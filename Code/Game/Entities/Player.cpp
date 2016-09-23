@@ -33,25 +33,22 @@ void Player::Update(float deltaSeconds)
         return;
     }
     Ship::Update(deltaSeconds);
-    if (InputSystem::instance->m_controllers[TheGame::instance->m_debuggingControllerIndex]->IsConnected())
+    float adjustedSpeed = m_speed / 15.0f;
+    Vector2 attemptedPosition = m_sprite->m_position + InputSystem::instance->m_controllers[TheGame::instance->m_debuggingControllerIndex]->GetLeftStickPosition() * adjustedSpeed;
+    //TODO: Bounds check
+    m_sprite->m_position = attemptedPosition;
+    if (InputSystem::instance->m_controllers[TheGame::instance->m_debuggingControllerIndex]->IsRightStickPastDeadzone())
     {
-        float adjustedSpeed = m_speed / 15.0f;
-        Vector2 attemptedPosition = m_sprite->m_position + InputSystem::instance->m_controllers[TheGame::instance->m_debuggingControllerIndex]->GetLeftStickPosition() * adjustedSpeed;
-        //TODO: Bounds check
-        m_sprite->m_position = attemptedPosition;
-        if (InputSystem::instance->m_controllers[TheGame::instance->m_debuggingControllerIndex]->IsRightStickPastDeadzone())
+        m_sprite->m_rotationDegrees = InputSystem::instance->m_controllers[TheGame::instance->m_debuggingControllerIndex]->GetRightStickAngleDegrees();
+        if (m_timeSinceLastShot > m_rateOfFire)
         {
-            m_sprite->m_rotationDegrees = InputSystem::instance->m_controllers[TheGame::instance->m_debuggingControllerIndex]->GetRightStickAngleDegrees();
-            if (m_timeSinceLastShot > m_rateOfFire)
-            {
-                TheGame::instance->SpawnBullet(this);
-                m_timeSinceLastShot = 0.0f;
-            }
+            TheGame::instance->SpawnBullet(this);
+            m_timeSinceLastShot = 0.0f;
         }
-        else if (InputSystem::instance->m_controllers[TheGame::instance->m_debuggingControllerIndex]->IsLeftStickPastDeadzone())
-        {
-            m_sprite->m_rotationDegrees = InputSystem::instance->m_controllers[TheGame::instance->m_debuggingControllerIndex]->GetLeftStickAngleDegrees();
-        }
+    }
+    else if (InputSystem::instance->m_controllers[TheGame::instance->m_debuggingControllerIndex]->IsLeftStickPastDeadzone())
+    {
+        m_sprite->m_rotationDegrees = InputSystem::instance->m_controllers[TheGame::instance->m_debuggingControllerIndex]->GetLeftStickAngleDegrees();
     }
 }
 

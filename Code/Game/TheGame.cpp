@@ -339,13 +339,6 @@ void TheGame::CleanupPlayingState(unsigned int)
 //-----------------------------------------------------------------------------------
 void TheGame::UpdatePlaying(float deltaSeconds)
 {
-    m_timeSinceLastSpawn += deltaSeconds;
-    if (m_timeSinceLastSpawn > TIME_PER_SPAWN)
-    {
-//         m_entities.push_back(new ItemBox(testBackground->GetBounds().GetRandomPointInside()));
-//         m_entities.push_back(new Grunt(testBackground->GetBounds().GetRandomPointInside()));
-        m_timeSinceLastSpawn = 0.0f;
-    }
     for (Entity* ent : m_entities)
     {
         ent->Update(deltaSeconds);
