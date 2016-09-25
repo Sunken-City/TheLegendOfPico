@@ -3,6 +3,7 @@
 #include <vector>
 #include "Engine/Math/Vector2.hpp"
 #include "Engine/Net/UDPIP/NetMessage.hpp"
+#include "Engine/Input/InputMap.hpp"
 
 class Entity;
 class Player;
@@ -47,6 +48,7 @@ public:
     std::vector<Player*> m_players;
     Player* m_localPlayer;
     int m_debuggingControllerIndex;
+    InputMap m_gameplayMapping;
 
 private:
     TheGame& operator= (const TheGame& other) = delete;
@@ -61,6 +63,7 @@ private:
     void CleanupPlayingState(unsigned int);
 
     void InitializeMainMenuState();
+    void InitializeKeyMappings();
     void CleanupMainMenuState(unsigned int);
     void UpdateMainMenu(float deltaSeconds);
     void RenderMainMenu() const;

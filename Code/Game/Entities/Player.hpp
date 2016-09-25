@@ -5,6 +5,15 @@
 class Player : public Ship
 {
 public:
+    enum Facing
+    {
+        WEST,
+        NORTH,
+        EAST,
+        SOUTH,
+        NUM_DIRECTIONS
+    };
+
     Player();
     ~Player();
     virtual void Update(float deltaSeconds);

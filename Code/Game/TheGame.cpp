@@ -25,6 +25,7 @@
 #include "Engine/Net/RemoteCommandService.hpp"
 #include "Engine/Net/UDPIP/NetConnection.hpp"
 #include "Engine/Net/UDPIP/NetSession.hpp"
+#include "Engine/Input/InputDevices.hpp"
 
 TheGame* TheGame::instance = nullptr;
 
@@ -47,6 +48,7 @@ TheGame::TheGame()
 {
     ResourceDatabase::instance = new ResourceDatabase();
     RegisterSprites();
+    InitializeKeyMappings();
     SetGameState(GameState::MAIN_MENU);
     InitializeMainMenuState();
 
@@ -300,6 +302,15 @@ void TheGame::RenderMainMenu() const
 }
 
 //-----------------------------------------------------------------------------------
+void TheGame::InitializeKeyMappings()
+{
+    KeyboardInputDevice* keyboard = InputSystem::instance->m_keyboardDevice;
+    m_gameplayMapping.AddInputAxis("Up", keyboard->FindValue('W'), keyboard->FindValue('S'));
+    m_gameplayMapping.AddInputAxis("Right", keyboard->FindValue('D'), keyboard->FindValue('A'));
+    m_gameplayMapping.AddInputValue("Attack", keyboard->FindValue(' '));
+}
+
+//-----------------------------------------------------------------------------------
 //PLAYING/////////////////////////////////////////////////////////////////////
 //-----------------------------------------------------------------------------------
 
@@ -311,14 +322,6 @@ void TheGame::InitializePlayingState()
     m_localPlayer = new Player();
     m_entities.push_back(m_localPlayer);
     m_players.push_back(m_localPlayer);
-//     ItemBox* box1 = new ItemBox(Vector2(2.0f));
-//     m_entities.push_back(box1);
-//     ItemBox* box2 = new ItemBox(Vector2(1.0f));
-//     m_entities.push_back(box2);
-//     Grunt* g1 = new Grunt(Vector2(-2.0f));
-//     m_entities.push_back(g1);
-//     Grunt* g2 = new Grunt(Vector2(-1.0f));
-//     m_entities.push_back(g2);
     SpriteGameRenderer::instance->SetWorldBounds(testBackground->GetBounds());
     OnStateSwitch.RegisterMethod(this, &TheGame::CleanupPlayingState);
 }
