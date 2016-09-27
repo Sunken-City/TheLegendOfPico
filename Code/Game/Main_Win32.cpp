@@ -41,7 +41,7 @@ bool g_isQuitting = false;
 HWND g_hWnd = nullptr;
 HDC g_displayDeviceContext = nullptr;
 HGLRC g_openGLRenderingContext = nullptr;
-const char* APP_NAME = "AllStar";
+const char* APP_NAME = "Zelda Battle";
 Event<float> NetworkUpdate;
 Event<> NetworkCleanup;
 

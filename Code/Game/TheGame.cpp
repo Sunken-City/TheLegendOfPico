@@ -26,6 +26,7 @@
 #include "Engine/Net/UDPIP/NetConnection.hpp"
 #include "Engine/Net/UDPIP/NetSession.hpp"
 #include "Engine/Input/InputDevices.hpp"
+#include "Engine/Net/NetSystem.hpp"
 
 TheGame* TheGame::instance = nullptr;
 
@@ -130,7 +131,7 @@ void TheGame::OnNetTick(NetConnection* cp)
     }
     NetMessage update(GAME_UPDATE);
     update.Write<Vector2>(m_localPlayer->m_sprite->m_position);
-    update.Write<float>(m_localPlayer->m_sprite->m_rotationDegrees);
+    update.Write<Player::Facing>(m_localPlayer->m_facing);
     cp->SendMessage(update);
 }
 
@@ -149,7 +150,7 @@ void TheGame::OnUpdateReceive(const NetSender& from, NetMessage& message)
             if (networkedPlayer->m_netOwnerIndex == idx)
             {
                 message.Read<Vector2>(networkedPlayer->m_sprite->m_position);
-                message.Read<float>(networkedPlayer->m_sprite->m_rotationDegrees);
+                message.Read<Player::Facing>(networkedPlayer->m_facing);
                 break;
             }
         }
@@ -168,44 +169,6 @@ void TheGame::Update(float deltaSeconds)
     if (Console::instance->IsActive())
     {
         return;
-    }
-
-#pragma todo("Reenable menu navigation once we have a more solid game flow")
-    if (InputSystem::instance->m_controllers[m_debuggingControllerIndex]->JustPressed(XboxButton::START) || InputSystem::instance->WasKeyJustPressed(InputSystem::ExtraKeys::ENTER))
-    {
-        switch (GetGameState())
-        {
-        case MAIN_MENU:
-            SetGameState(PLAYING);
-            InitializePlayingState();
-            break;
-        case PLAYING:
-            //SetGameState(GAME_OVER);
-            //InitializeGameOverState();
-            break;
-        case GAME_OVER:
-            //SetGameState(MAIN_MENU);
-            //InitializeMainMenuState();
-            break;
-        default:
-            break;
-        }
-    }
-    else if (InputSystem::instance->m_controllers[m_debuggingControllerIndex]->JustPressed(XboxButton::BACK) || InputSystem::instance->WasKeyJustPressed(InputSystem::ExtraKeys::BACKSPACE))
-    {
-        switch (GetGameState())
-        {
-        case GAME_OVER:
-            //SetGameState(PLAYING);
-            //InitializePlayingState();
-            break;
-        case PLAYING:
-            //SetGameState(MAIN_MENU);
-            //InitializeMainMenuState();
-            break;
-        default:
-            break;
-        }
     }
 
     switch (GetGameState())
@@ -292,6 +255,20 @@ void TheGame::CleanupMainMenuState(unsigned int)
 void TheGame::UpdateMainMenu(float deltaSeconds)
 {
     UNUSED(deltaSeconds);
+
+    if (m_gameplayMapping.IsDown("Host"))
+    {
+        Console::instance->RunCommand("nethost Host");
+        SetGameState(PLAYING);
+        InitializePlayingState();
+    }
+    if (m_gameplayMapping.IsDown("Join"))
+    {
+        Console::instance->RunCommand(Stringf("netjoin client %s", NetSystem::SockAddrToString(NetSystem::GetLocalHostAddressUDP("4334"))));
+
+        SetGameState(PLAYING);
+        InitializePlayingState();
+    }
 }
 
 //-----------------------------------------------------------------------------------
@@ -308,6 +285,8 @@ void TheGame::InitializeKeyMappings()
     m_gameplayMapping.AddInputAxis("Up", keyboard->FindValue('W'), keyboard->FindValue('S'));
     m_gameplayMapping.AddInputAxis("Right", keyboard->FindValue('D'), keyboard->FindValue('A'));
     m_gameplayMapping.AddInputValue("Attack", keyboard->FindValue(' '));
+    m_gameplayMapping.AddInputValue("Host", keyboard->FindValue('H'));
+    m_gameplayMapping.AddInputValue("Join", keyboard->FindValue('J'));
 }
 
 //-----------------------------------------------------------------------------------
@@ -437,7 +416,10 @@ void TheGame::SpawnPickup(const Vector2& spawnPosition)
 void TheGame::RegisterSprites()
 {
     ResourceDatabase::instance->RegisterSprite("Map", "Data\\Images\\SymmetryCityMap.png");
-    ResourceDatabase::instance->RegisterSprite("Player", "Data\\Images\\TempCapeBusiness.png");
+    ResourceDatabase::instance->RegisterSprite("pDown", "Data\\Images\\standingDown.png");
+    ResourceDatabase::instance->RegisterSprite("pUp", "Data\\Images\\standingUp.png");
+    ResourceDatabase::instance->RegisterSprite("pRight", "Data\\Images\\standingRight.png");
+    ResourceDatabase::instance->RegisterSprite("pLeft", "Data\\Images\\standingLeft.png");
     //-----------------------------------------------------------------------------------
     ResourceDatabase::instance->RegisterSprite("TitleText", "Data\\Images\\Title.png");
     ResourceDatabase::instance->RegisterSprite("GameOverText", "Data\\Images\\GameOver.png");
