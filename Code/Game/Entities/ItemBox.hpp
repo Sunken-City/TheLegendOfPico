@@ -1,6 +1,7 @@
 #pragma once
-#include "Game/Entities/Ship.hpp"
+#include "Game/Entities/Entity.hpp"
 
+//-----------------------------------------------------------------------------------
 class ItemBox : public Entity
 {
 public:

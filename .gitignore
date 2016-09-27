@@ -3,6 +3,7 @@
 
 # User-specific files
 Temporary/
+Run_Win32/Logs/
 *.suo
 *.user
 *.userosscache

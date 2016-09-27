@@ -8,9 +8,13 @@
 
 //-----------------------------------------------------------------------------------
 Player::Player()
-    : Ship()
+    : Entity()
     , m_netOwnerIndex(0)
     , m_facing(Facing::SOUTH)
+    , m_speed(0.0f)
+    , m_power(0.0f)
+    , m_rateOfFire(0.0f)
+    , m_timeSinceLastShot(0.0f)
 {
     m_isDead = false;
     m_maxHp = 10.0f;
@@ -34,7 +38,8 @@ void Player::Update(float deltaSeconds)
     {
         return;
     }
-    Ship::Update(deltaSeconds);
+    Entity::Update(deltaSeconds);
+    m_timeSinceLastShot += deltaSeconds;
     float adjustedSpeed = m_speed / 20.0f;
 
     InputMap& input = TheGame::instance->m_gameplayMapping;
@@ -72,7 +77,7 @@ void Player::Render() const
 //-----------------------------------------------------------------------------------
 void Player::ResolveCollision(Entity* otherEntity)
 {
-    Ship::ResolveCollision(otherEntity);
+    Entity::ResolveCollision(otherEntity);
 }
 
 //-----------------------------------------------------------------------------------

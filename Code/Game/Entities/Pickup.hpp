@@ -1,6 +1,7 @@
 #pragma once
-#include "Game/Entities/Ship.hpp"
+#include "Game/Entities/Entity.hpp"
 
+//-----------------------------------------------------------------------------------
 enum PickupType
 {
     SPEED = 0,
@@ -11,6 +12,7 @@ enum PickupType
     NUM_TYPES
 };
 
+//-----------------------------------------------------------------------------------
 class Pickup : public Entity
 {
 public:

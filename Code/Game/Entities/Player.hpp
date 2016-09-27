@@ -1,8 +1,8 @@
 #pragma once
-#include "Game/Entities/Ship.hpp"
+#include "Game/Entities/Entity.hpp"
 #include <stdint.h>
 
-class Player : public Ship
+class Player : public Entity
 {
 public:
     enum Facing
@@ -24,4 +24,8 @@ public:
     //MEMBER VARIABLES/////////////////////////////////////////////////////////////////////
     uint8_t m_netOwnerIndex;
     Facing m_facing;
+    float m_speed;
+    float m_power;
+    float m_rateOfFire;
+    float m_timeSinceLastShot;
 };

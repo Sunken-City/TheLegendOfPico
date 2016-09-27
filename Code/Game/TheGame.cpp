@@ -18,9 +18,7 @@
 #include "Game/Entities/Entity.hpp"
 #include "Game/Entities/Player.hpp"
 #include "Game/Entities/Bullet.hpp"
-#include "Game/Entities/Ship.hpp"
 #include "Entities/ItemBox.hpp"
-#include "Entities/Grunt.hpp"
 #include "Entities/Pickup.hpp"
 #include "Engine/Net/RemoteCommandService.hpp"
 #include "Engine/Net/UDPIP/NetConnection.hpp"
@@ -401,7 +399,7 @@ void TheGame::RenderGameOver() const
 }
 
 //-----------------------------------------------------------------------------------
-void TheGame::SpawnBullet(Ship* creator)
+void TheGame::SpawnBullet(Entity* creator)
 {
     m_newEntities.push_back(new Bullet(creator));
 }

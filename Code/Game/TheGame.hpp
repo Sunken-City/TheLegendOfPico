@@ -29,7 +29,7 @@ public:
     void OnUpdateReceive(const NetSender& from, NetMessage& message);
     void Update(float deltaTime);
     void Render() const;
-    void SpawnBullet(Ship* creator);
+    void SpawnBullet(Entity* creator);
     void SpawnPickup(const Vector2& spawnPosition);
 
     static TheGame* instance;

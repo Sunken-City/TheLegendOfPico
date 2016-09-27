@@ -29,16 +29,10 @@
     <ClCompile Include="Entities\Player.cpp">
       <Filter>General\Entities</Filter>
     </ClCompile>
-    <ClCompile Include="Entities\Ship.cpp">
-      <Filter>General\Entities</Filter>
-    </ClCompile>
     <ClCompile Include="Entities\Bullet.cpp">
       <Filter>General\Entities</Filter>
     </ClCompile>
     <ClCompile Include="Entities\ItemBox.cpp">
-      <Filter>General\Entities</Filter>
-    </ClCompile>
-    <ClCompile Include="Entities\Grunt.cpp">
       <Filter>General\Entities</Filter>
     </ClCompile>
     <ClCompile Include="Entities\Pickup.cpp">
@@ -61,16 +55,10 @@
     <ClInclude Include="Entities\Player.hpp">
       <Filter>General\Entities</Filter>
     </ClInclude>
-    <ClInclude Include="Entities\Ship.hpp">
-      <Filter>General\Entities</Filter>
-    </ClInclude>
     <ClInclude Include="Entities\Bullet.hpp">
       <Filter>General\Entities</Filter>
     </ClInclude>
     <ClInclude Include="Entities\ItemBox.hpp">
-      <Filter>General\Entities</Filter>
-    </ClInclude>
-    <ClInclude Include="Entities\Grunt.hpp">
       <Filter>General\Entities</Filter>
     </ClInclude>
     <ClInclude Include="Entities\Pickup.hpp">
