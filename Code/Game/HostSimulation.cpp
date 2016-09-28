@@ -40,19 +40,34 @@ void HostSimulation::OnUpdateFromClientReceived(const NetSender& from, NetMessag
     Vector2 upValues;
     message.Read<Vector2>(rightValues);
     message.Read<Vector2>(upValues);
-    m_networkMapping.FindInputAxis("Right")->SetValue(rightValues.x, rightValues.y);
-    m_networkMapping.FindInputAxis("Up")->SetValue(upValues.x, upValues.y);
+    m_networkMappings[from.connection->m_index].FindInputAxis("Right")->SetValue(rightValues.x, rightValues.y);
+    m_networkMappings[from.connection->m_index].FindInputAxis("Up")->SetValue(upValues.x, upValues.y);
 }
 
 //-----------------------------------------------------------------------------------
 void HostSimulation::OnConnectionJoined(NetConnection* cp)
 {
-    Link* player = new Link();
-    player->m_netOwnerIndex = cp->m_index;
-    delete player->m_sprite; //Host has no graphics, delete the sprite
-    player->m_sprite = nullptr;
-    m_players[cp->m_index] = player;
-    m_entities.push_back(player);
+    //Let everyone know about the guy we just created (Including ourselves!).
+    for (NetConnection* conn : NetSession::instance->m_allConnections)
+    {
+        if (conn)
+        {
+            NetMessage message(GameNetMessages::PLAYER_CREATE);
+            message.Write<uint8_t>(cp->m_index);
+            conn->SendMessage(message);
+        }
+    }
+
+    //Bring the client up to speed.
+    for (Link* link : m_players)
+    {
+        if (link)
+        {
+            NetMessage message(GameNetMessages::PLAYER_CREATE);
+            message.Write<uint8_t>(link->m_netOwnerIndex);
+            cp->SendMessage(message);
+        }
+    }
 }
 
 //-----------------------------------------------------------------------------------
@@ -74,18 +89,35 @@ void HostSimulation::OnConnectionLeave(NetConnection* cp)
 }
 
 //-----------------------------------------------------------------------------------
+void HostSimulation::OnPlayerDestroy(const NetSender& from, NetMessage& message)
+{
+    throw std::logic_error("The method or operation is not implemented.");
+}
+
+//-----------------------------------------------------------------------------------
+void HostSimulation::OnPlayerCreate(const NetSender& from, NetMessage& message)
+{
+    Link* player = new Link();
+    message.Read<uint8_t>(player->m_netOwnerIndex);
+    delete player->m_sprite; //Host has no graphics, delete the sprite
+    player->m_sprite = nullptr;
+    m_players[player->m_netOwnerIndex] = player;
+    m_entities.push_back(player);
+}
+
+//-----------------------------------------------------------------------------------
 void HostSimulation::SendNetHostUpdate(NetConnection* cp)
 {
+    NetMessage update(GameNetMessages::HOST_TO_CLIENT_UPDATE);
     for (Link* link : m_players)
     {
         if (link)
         {
-            NetMessage update(GameNetMessages::HOST_TO_CLIENT_UPDATE);
             update.Write<Vector2>(link->m_position);
             update.Write<Link::Facing>(link->m_facing);
-            cp->SendMessage(update);
         }
     }
+    cp->SendMessage(update);
 }
 
 //-----------------------------------------------------------------------------------
@@ -155,18 +187,25 @@ void HostSimulation::SpawnPickup(const Vector2& spawnPosition)
 //-----------------------------------------------------------------------------------
 void HostSimulation::InitializeKeyMappings()
 {
-    m_networkMapping.AddInputAxis("Up", new InputValue(&m_networkMapping), new InputValue(&m_networkMapping));
-    m_networkMapping.AddInputAxis("Right", new InputValue(&m_networkMapping), new InputValue(&m_networkMapping));
+    m_networkMappings.resize(8);
+    for (unsigned int i = 0; i < 8; ++i)
+    {
+        m_networkMappings[i].AddInputAxis("Up", new InputValue(&m_networkMappings[i]), new InputValue(&m_networkMappings[i]));
+        m_networkMappings[i].AddInputAxis("Right", new InputValue(&m_networkMappings[i]), new InputValue(&m_networkMappings[i]));
+    }
 }
 
 //-----------------------------------------------------------------------------------
 void HostSimulation::UninitializeKeyMappings()
 {
-    InputAxis* tempAxis = m_networkMapping.FindInputAxis("Up");
-    delete tempAxis->m_positiveValue;
-    delete tempAxis->m_negativeValue;
+    for (unsigned int i = 0; i < 8; ++i)
+    {
+        InputAxis* tempAxis = m_networkMappings[i].FindInputAxis("Up");
+        delete tempAxis->m_positiveValue;
+        delete tempAxis->m_negativeValue;
 
-    tempAxis = m_networkMapping.FindInputAxis("Right");
-    delete tempAxis->m_positiveValue;
-    delete tempAxis->m_negativeValue;
+        tempAxis = m_networkMappings[i].FindInputAxis("Right");
+        delete tempAxis->m_positiveValue;
+        delete tempAxis->m_negativeValue;
+    }
 }

@@ -38,6 +38,14 @@ void ClientSimulation::Update(float deltaSeconds)
     {
         SpriteGameRenderer::instance->SetCameraPosition(m_localPlayer->m_position);
     }
+    else
+    {
+#pragma todo("This is a workaround for an issue where the client gets a reliable inorder message before they've recieved their accept message. #helpC4")
+        if (NetSession::instance->GetMyConnectionIndex() != NetSession::INVALID_CONNECTION_INDEX && m_players[NetSession::instance->GetMyConnectionIndex()] != nullptr)
+        {
+            m_localPlayer = m_players[NetSession::instance->GetMyConnectionIndex()];
+        }
+    }
 }
 
 //-----------------------------------------------------------------------------------
@@ -53,7 +61,6 @@ void ClientSimulation::OnUpdateFromHostReceived(const NetSender& from, NetMessag
                 message.Read<Vector2>(networkedPlayer->m_position);
                 message.Read<Link::Facing>(networkedPlayer->m_facing);
                 networkedPlayer->ApplyClientUpdate();
-                break;
             }
         }
     }
@@ -76,14 +83,7 @@ void ClientSimulation::SendNetClientUpdate(NetConnection* cp)
 //-----------------------------------------------------------------------------------
 void ClientSimulation::OnConnectionJoined(NetConnection* cp)
 {
-    Link* player = new Link();
-    player->m_netOwnerIndex = cp->m_index;
-    m_players[cp->m_index] = player;
-    m_entities.push_back(player);
-    if (cp->m_index == NetSession::instance->GetMyConnectionIndex())
-    {
-        m_localPlayer = player;
-    }
+
 }
 
 //-----------------------------------------------------------------------------------
@@ -103,4 +103,24 @@ void ClientSimulation::OnConnectionLeave(NetConnection* cp)
             break;
         }
     }
+}
+
+//-----------------------------------------------------------------------------------
+void ClientSimulation::OnPlayerCreate(const NetSender& from, NetMessage& message)
+{
+    Link* player = new Link();
+    message.Read<uint8_t>(player->m_netOwnerIndex);
+    m_players[player->m_netOwnerIndex] = player;
+    m_entities.push_back(player);
+    if (player->m_netOwnerIndex == NetSession::instance->GetMyConnectionIndex())
+    {
+        m_localPlayer = player;
+    }
+}
+
+
+//-----------------------------------------------------------------------------------
+void ClientSimulation::OnPlayerDestroy(const NetSender& from, NetMessage& message)
+{
+    throw std::logic_error("The method or operation is not implemented.");
 }

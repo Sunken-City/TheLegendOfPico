@@ -50,10 +50,35 @@ void OnClientToHostUpdateReceiveHelper(const NetSender& from, NetMessage& messag
 //-----------------------------------------------------------------------------------
 void OnHostToClientUpdateReceiveHelper(const NetSender& from, NetMessage& message)
 {
-#pragma todo("Remove this helper and use events for the messages")
     if (TheGame::instance->m_client)
     {
         TheGame::instance->m_client->OnUpdateFromHostReceived(from, message);
+    }
+}
+
+//-----------------------------------------------------------------------------------
+void OnPlayerCreate(const NetSender& from, NetMessage& message)
+{
+    if (TheGame::instance->m_host)
+    {
+        TheGame::instance->m_host->OnPlayerCreate(from, NetMessage(message));
+    }
+    if (TheGame::instance->m_client)
+    {
+        TheGame::instance->m_client->OnPlayerCreate(from, NetMessage(message));
+    }
+}
+
+//-----------------------------------------------------------------------------------
+void OnPlayerDestroy(const NetSender& from, NetMessage& message)
+{
+    if (TheGame::instance->m_host)
+    {
+        TheGame::instance->m_host->OnPlayerDestroy(from, message);
+    }
+    if (TheGame::instance->m_client)
+    {
+        TheGame::instance->m_client->OnPlayerDestroy(from, message);
     }
 }
 
@@ -80,6 +105,8 @@ TheGame::TheGame()
     Console::instance->RunCommand("nsinit");
     NetSession::instance->RegisterMessage((uint8_t)CLIENT_TO_HOST_UPDATE, "Client to Host Update", &OnClientToHostUpdateReceiveHelper, (uint32_t)NetMessage::Option::NONE, (uint32_t)NetMessage::Control::NONE);
     NetSession::instance->RegisterMessage((uint8_t)HOST_TO_CLIENT_UPDATE, "Host to Client Update", &OnHostToClientUpdateReceiveHelper, (uint32_t)NetMessage::Option::NONE, (uint32_t)NetMessage::Control::NONE);
+    NetSession::instance->RegisterMessage((uint8_t)PLAYER_CREATE, "Player Create", &OnPlayerCreate, (uint32_t)NetMessage::Option::RELIABLE | (uint32_t)NetMessage::Option::INORDER, (uint32_t)NetMessage::Control::NONE);
+    NetSession::instance->RegisterMessage((uint8_t)PLAYER_DESTROY, "Player Destroy", &OnPlayerDestroy, (uint32_t)NetMessage::Option::RELIABLE | (uint32_t)NetMessage::Option::INORDER, (uint32_t)NetMessage::Control::NONE);
     NetSession::instance->m_OnConnectionJoin.RegisterMethod(this, &TheGame::OnConnectionJoined);
     NetSession::instance->m_OnConnectionLeave.RegisterMethod(this, &TheGame::OnConnectionLeave);
     NetSession::instance->m_OnNetTick.RegisterMethod(this, &TheGame::OnNetTick);
@@ -244,7 +271,13 @@ void TheGame::UpdateMainMenu(float deltaSeconds)
             Sleep(100);
         }
         //Force creation of the host's player and potentially local client player.
-        OnConnectionJoined(NetSession::instance->m_hostConnection);
+        NetMessage message(GameNetMessages::PLAYER_CREATE);
+        message.Write<uint8_t>(NetSession::instance->m_hostConnection->m_index);
+        NetSession::instance->m_hostConnection->SendMessage(message);
+
+        KeyboardInputDevice* keyboard = InputSystem::instance->m_keyboardDevice;
+        m_gameplayMapping.AddInputAxis("Up", keyboard->FindValue('W'), keyboard->FindValue('S'));
+        m_gameplayMapping.AddInputAxis("Right", keyboard->FindValue('D'), keyboard->FindValue('A'));
 
         SetGameState(PLAYING);
         InitializePlayingState();
@@ -253,6 +286,10 @@ void TheGame::UpdateMainMenu(float deltaSeconds)
     {
         m_client = new ClientSimulation();
         Console::instance->RunCommand(Stringf("netjoin client %s", NetSystem::SockAddrToString(NetSystem::GetLocalHostAddressUDP("4334"))));
+
+        KeyboardInputDevice* keyboard = InputSystem::instance->m_keyboardDevice;
+        m_gameplayMapping.AddInputAxis("Up", keyboard->FindValue('I'), keyboard->FindValue('K'));
+        m_gameplayMapping.AddInputAxis("Right", keyboard->FindValue('L'), keyboard->FindValue('J'));
 
         SetGameState(PLAYING);
         InitializePlayingState();
@@ -270,8 +307,6 @@ void TheGame::RenderMainMenu() const
 void TheGame::InitializeKeyMappings()
 {
     KeyboardInputDevice* keyboard = InputSystem::instance->m_keyboardDevice;
-    m_gameplayMapping.AddInputAxis("Up", keyboard->FindValue('W'), keyboard->FindValue('S'));
-    m_gameplayMapping.AddInputAxis("Right", keyboard->FindValue('D'), keyboard->FindValue('A'));
     m_gameplayMapping.AddInputValue("Attack", keyboard->FindValue(' '));
     m_gameplayMapping.AddInputValue("Host", keyboard->FindValue('H'));
     m_gameplayMapping.AddInputValue("Join", keyboard->FindValue('J'));

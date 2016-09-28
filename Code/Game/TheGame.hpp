@@ -17,6 +17,8 @@ enum GameNetMessages
 {
     CLIENT_TO_HOST_UPDATE = NetMessage::CoreMessageTypes::NUM_MESSAGES,
     HOST_TO_CLIENT_UPDATE,
+    PLAYER_CREATE,
+    PLAYER_DESTROY,
 };
 
 //-----------------------------------------------------------------------------------

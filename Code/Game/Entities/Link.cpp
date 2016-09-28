@@ -18,6 +18,7 @@ Link::Link()
     , m_timeSinceLastShot(0.0f)
     , m_color(RGBA::GetRandom())
 {
+    m_collisionRadius = 0.3f;
     m_isDead = false;
     m_maxHp = 10.0f;
     m_hp = 10.0f;
@@ -42,7 +43,7 @@ void Link::Update(float deltaSeconds)
     m_timeSinceLastShot += deltaSeconds;
     float adjustedSpeed = m_speed / 20.0f;
 
-    InputMap& input = TheGame::instance->m_host->m_networkMapping;
+    InputMap& input = TheGame::instance->m_host->m_networkMappings[m_netOwnerIndex];
     Vector2 inputDirection = input.GetVector2("Right", "Up");
     Vector2 attemptedPosition = m_position + inputDirection * adjustedSpeed;
 

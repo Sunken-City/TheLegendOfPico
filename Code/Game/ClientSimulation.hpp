@@ -18,6 +18,8 @@ public:
     void SendNetClientUpdate(NetConnection* cp);
     void OnConnectionJoined(NetConnection* cp);
     void OnConnectionLeave(NetConnection* cp);
+    void OnPlayerCreate(const NetSender& from, NetMessage& message);
+    void OnPlayerDestroy(const NetSender& from, NetMessage& message);
 
     //MEMBER VARIABLES/////////////////////////////////////////////////////////////////////
     Link* m_localPlayer;
