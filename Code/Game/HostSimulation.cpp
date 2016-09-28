@@ -49,6 +49,8 @@ void HostSimulation::OnConnectionJoined(NetConnection* cp)
 {
     Link* player = new Link();
     player->m_netOwnerIndex = cp->m_index;
+    delete player->m_sprite; //Host has no graphics, delete the sprite
+    player->m_sprite = nullptr;
     m_players[cp->m_index] = player;
     m_entities.push_back(player);
 }
@@ -79,7 +81,7 @@ void HostSimulation::SendNetHostUpdate(NetConnection* cp)
         if (link)
         {
             NetMessage update(GameNetMessages::HOST_TO_CLIENT_UPDATE);
-            update.Write<Vector2>(link->m_sprite->m_position);
+            update.Write<Vector2>(link->m_position);
             update.Write<Link::Facing>(link->m_facing);
             cp->SendMessage(update);
         }
@@ -147,7 +149,7 @@ void HostSimulation::SpawnArrow(Entity* creator)
 //-----------------------------------------------------------------------------------
 void HostSimulation::SpawnPickup(const Vector2& spawnPosition)
 {
-    m_newEntities.push_back(new Pickup(spawnPosition));
+    //m_newEntities.push_back(new Pickup(spawnPosition));
 }
 
 //-----------------------------------------------------------------------------------

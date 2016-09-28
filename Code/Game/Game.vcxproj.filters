@@ -26,15 +26,6 @@
     <ClCompile Include="Entities\Entity.cpp">
       <Filter>General\Entities</Filter>
     </ClCompile>
-    <ClCompile Include="Entities\Bullet.cpp">
-      <Filter>General\Entities</Filter>
-    </ClCompile>
-    <ClCompile Include="Entities\ItemBox.cpp">
-      <Filter>General\Entities</Filter>
-    </ClCompile>
-    <ClCompile Include="Entities\Pickup.cpp">
-      <Filter>General\Entities</Filter>
-    </ClCompile>
     <ClCompile Include="Entities\Link.cpp">
       <Filter>General\Entities</Filter>
     </ClCompile>
@@ -56,15 +47,6 @@
       <Filter>General</Filter>
     </ClInclude>
     <ClInclude Include="Entities\Entity.hpp">
-      <Filter>General\Entities</Filter>
-    </ClInclude>
-    <ClInclude Include="Entities\Bullet.hpp">
-      <Filter>General\Entities</Filter>
-    </ClInclude>
-    <ClInclude Include="Entities\ItemBox.hpp">
-      <Filter>General\Entities</Filter>
-    </ClInclude>
-    <ClInclude Include="Entities\Pickup.hpp">
       <Filter>General\Entities</Filter>
     </ClInclude>
     <ClInclude Include="Entities\Link.hpp">

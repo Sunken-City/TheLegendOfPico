@@ -243,6 +243,8 @@ void TheGame::UpdateMainMenu(float deltaSeconds)
         {
             Sleep(100);
         }
+        //Force creation of the host's player and potentially local client player.
+        OnConnectionJoined(NetSession::instance->m_hostConnection);
 
         SetGameState(PLAYING);
         InitializePlayingState();
@@ -251,10 +253,6 @@ void TheGame::UpdateMainMenu(float deltaSeconds)
     {
         m_client = new ClientSimulation();
         Console::instance->RunCommand(Stringf("netjoin client %s", NetSystem::SockAddrToString(NetSystem::GetLocalHostAddressUDP("4334"))));
-        while (NetSession::instance->AmIConnected())
-        {
-            Sleep(100);
-        }
 
         SetGameState(PLAYING);
         InitializePlayingState();
@@ -306,7 +304,7 @@ void TheGame::UpdatePlaying(float deltaSeconds)
     {
         m_host->Update(deltaSeconds);
     }
-    if (NetSession::instance->AmIConnected())
+    if (m_client)
     {
         m_client->Update(deltaSeconds);
     }

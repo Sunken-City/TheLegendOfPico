@@ -36,7 +36,7 @@ void ClientSimulation::Update(float deltaSeconds)
 {
     if (m_localPlayer)
     {
-        SpriteGameRenderer::instance->SetCameraPosition(m_localPlayer->m_sprite->m_position);
+        SpriteGameRenderer::instance->SetCameraPosition(m_localPlayer->m_position);
     }
 }
 
@@ -50,8 +50,9 @@ void ClientSimulation::OnUpdateFromHostReceived(const NetSender& from, NetMessag
         {
             if (networkedPlayer)
             {
-                message.Read<Vector2>(networkedPlayer->m_sprite->m_position);
+                message.Read<Vector2>(networkedPlayer->m_position);
                 message.Read<Link::Facing>(networkedPlayer->m_facing);
+                networkedPlayer->ApplyClientUpdate();
                 break;
             }
         }

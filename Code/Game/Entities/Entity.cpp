@@ -10,6 +10,7 @@ Entity::Entity()
     , m_collisionRadius(1.0f)
     , m_age(0.0f)
     , m_isDead(false)
+    , m_position(0.0f)
 {
 
 }
@@ -44,8 +45,8 @@ bool Entity::IsCollidingWith(Entity* otherEntity)
 //-----------------------------------------------------------------------------------
 void Entity::ResolveCollision(Entity* otherEntity)
 {
-    Vector2& myPosition = this->m_sprite->m_position;
-    Vector2 otherPosition = otherEntity->m_sprite->m_position;
+    Vector2& myPosition = m_position;
+    Vector2 otherPosition = otherEntity->m_position;
     Vector2 difference = myPosition - otherPosition;
     float distanceBetweenPoints = MathUtils::CalcDistanceBetweenPoints(otherPosition, myPosition);
     float firstPushDist = (this->m_collisionRadius - distanceBetweenPoints) / 8.f;

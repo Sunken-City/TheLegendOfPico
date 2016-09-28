@@ -44,13 +44,33 @@ void Link::Update(float deltaSeconds)
 
     InputMap& input = TheGame::instance->m_host->m_networkMapping;
     Vector2 inputDirection = input.GetVector2("Right", "Up");
-    Vector2 attemptedPosition = m_sprite->m_position + inputDirection * adjustedSpeed;
+    Vector2 attemptedPosition = m_position + inputDirection * adjustedSpeed;
 
     //TODO: Bounds check
-    m_sprite->m_position = attemptedPosition;
+    m_position = attemptedPosition;
+    if (m_sprite)
+    {
+        m_sprite->m_position = attemptedPosition;
+    }
 
     m_facing = GetFacingFromInput(inputDirection);
+}
 
+//-----------------------------------------------------------------------------------
+void Link::Render() const
+{
+
+}
+
+//-----------------------------------------------------------------------------------
+void Link::ResolveCollision(Entity* otherEntity)
+{
+    Entity::ResolveCollision(otherEntity);
+}
+
+//-----------------------------------------------------------------------------------
+void Link::UpdateSpriteFromFacing()
+{
     switch (m_facing)
     {
     case Link::WEST:
@@ -68,18 +88,6 @@ void Link::Update(float deltaSeconds)
     default:
         break;
     }
-}
-
-//-----------------------------------------------------------------------------------
-void Link::Render() const
-{
-
-}
-
-//-----------------------------------------------------------------------------------
-void Link::ResolveCollision(Entity* otherEntity)
-{
-    Entity::ResolveCollision(otherEntity);
 }
 
 //-----------------------------------------------------------------------------------
@@ -112,5 +120,15 @@ Link::Facing Link::GetFacingFromInput(const Vector2& inputDirection)
         bestDirection = Facing::EAST;
     }
     return bestDirection;
+}
+
+//-----------------------------------------------------------------------------------
+void Link::ApplyClientUpdate()
+{
+    if (m_sprite)
+    {
+        m_sprite->m_position = m_position;
+    }
+    UpdateSpriteFromFacing();
 }
 
