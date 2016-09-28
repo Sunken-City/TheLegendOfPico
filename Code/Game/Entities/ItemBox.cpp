@@ -25,7 +25,7 @@ ItemBox::~ItemBox()
         int maxNumItems = MathUtils::GetRandomIntFromZeroTo(5);
         for (int i = 0; i < maxNumItems; ++i)
         {
-            TheGame::instance->SpawnPickup(m_sprite->m_position);
+            //TheGame::instance->SpawnPickup(m_sprite->m_position);
         }
     }
 }

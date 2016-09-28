@@ -1,8 +1,9 @@
 #pragma once
 #include "Game/Entities/Entity.hpp"
+#include "Engine/Renderer/RGBA.hpp"
 #include <stdint.h>
 
-class Player : public Entity
+class Link : public Entity
 {
 public:
     enum Facing
@@ -14,8 +15,10 @@ public:
         NUM_DIRECTIONS
     };
 
-    Player();
-    ~Player();
+    Link();
+    ~Link();
+
+    //FUNCTIONS/////////////////////////////////////////////////////////////////////
     virtual void Update(float deltaSeconds);
     virtual void Render() const;
     virtual void ResolveCollision(Entity* otherEntity);
@@ -28,4 +31,5 @@ public:
     float m_power;
     float m_rateOfFire;
     float m_timeSinceLastShot;
+    RGBA m_color;
 };
