@@ -16,6 +16,8 @@ public:
     void Update(float deltaSeconds);
     void OnUpdateFromHostReceived(const NetSender& from, NetMessage& message);
     void SendNetClientUpdate(NetConnection* cp);
+    void OnConnectionJoined(NetConnection* cp);
+    void OnConnectionLeave(NetConnection* cp);
 
     //MEMBER VARIABLES/////////////////////////////////////////////////////////////////////
     Link* m_localPlayer;

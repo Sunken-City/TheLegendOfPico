@@ -16,7 +16,7 @@ class ClientSimulation;
 enum GameNetMessages
 {
     CLIENT_TO_HOST_UPDATE = NetMessage::CoreMessageTypes::NUM_MESSAGES,
-    HOST_TO_CLIENT_UPDATE = NetMessage::CoreMessageTypes::NUM_MESSAGES,
+    HOST_TO_CLIENT_UPDATE,
 };
 
 //-----------------------------------------------------------------------------------
@@ -28,7 +28,6 @@ public:
     void OnConnectionJoined(NetConnection* cp);
     void OnConnectionLeave(NetConnection* cp);
     void OnNetTick(NetConnection* cp);
-    void OnUpdateReceive(const NetSender& from, NetMessage& message);
     void Update(float deltaTime);
     void Render() const;
 

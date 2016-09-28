@@ -8,20 +8,23 @@
 #include "Engine/Math/Vector2.hpp"
 #include "Engine/Renderer/2D/Sprite.hpp"
 #include "TheGame.hpp"
+#include "Engine/Net/UDPIP/NetSession.hpp"
 
 //-----------------------------------------------------------------------------------
 HostSimulation::HostSimulation()
 {
+    InitializeKeyMappings();
     m_players.reserve(8);
-    for (Link* player : m_players)
+    for (unsigned int i = 0; i < 8; ++i)
     {
-        player = nullptr;
+        m_players.push_back(nullptr);
     }
 }
 
 //-----------------------------------------------------------------------------------
 HostSimulation::~HostSimulation()
 {
+    UninitializeKeyMappings();
     for (Entity* ent : m_entities)
     {
         delete ent;
@@ -33,10 +36,39 @@ HostSimulation::~HostSimulation()
 //-----------------------------------------------------------------------------------
 void HostSimulation::OnUpdateFromClientReceived(const NetSender& from, NetMessage& message)
 {
-    Vector2 inputDirection;
-    message.Read<Vector2>(inputDirection);
-    m_networkMapping.FindInputAxis("Right")->SetValue(inputDirection.x);
-    m_networkMapping.FindInputAxis("Up")->SetValue(inputDirection.y);
+    Vector2 rightValues;
+    Vector2 upValues;
+    message.Read<Vector2>(rightValues);
+    message.Read<Vector2>(upValues);
+    m_networkMapping.FindInputAxis("Right")->SetValue(rightValues.x, rightValues.y);
+    m_networkMapping.FindInputAxis("Up")->SetValue(upValues.x, upValues.y);
+}
+
+//-----------------------------------------------------------------------------------
+void HostSimulation::OnConnectionJoined(NetConnection* cp)
+{
+    Link* player = new Link();
+    player->m_netOwnerIndex = cp->m_index;
+    m_players[cp->m_index] = player;
+    m_entities.push_back(player);
+}
+
+//-----------------------------------------------------------------------------------
+void HostSimulation::OnConnectionLeave(NetConnection* cp)
+{
+    uint8_t idx = cp->m_index;
+    for (auto iter = m_players.begin(); iter != m_players.end(); ++iter)
+    {
+        Link* networkedPlayer = *iter;
+        if (networkedPlayer && networkedPlayer->m_netOwnerIndex == idx)
+        {
+            auto entityItr = std::find(m_entities.begin(), m_entities.end(), networkedPlayer);
+            m_entities.erase(entityItr);
+            delete networkedPlayer;
+            iter = m_players.erase(iter);
+            break;
+        }
+    }
 }
 
 //-----------------------------------------------------------------------------------
@@ -44,10 +76,13 @@ void HostSimulation::SendNetHostUpdate(NetConnection* cp)
 {
     for (Link* link : m_players)
     {
-        NetMessage update(GameNetMessages::HOST_TO_CLIENT_UPDATE);
-        update.Write<Vector2>(link->m_sprite->m_position);
-        update.Write<Link::Facing>(link->m_facing);
-        cp->SendMessage(update);
+        if (link)
+        {
+            NetMessage update(GameNetMessages::HOST_TO_CLIENT_UPDATE);
+            update.Write<Vector2>(link->m_sprite->m_position);
+            update.Write<Link::Facing>(link->m_facing);
+            cp->SendMessage(update);
+        }
     }
 }
 

@@ -93,6 +93,15 @@ TheGame::~TheGame()
     delete ResourceDatabase::instance;
     ResourceDatabase::instance = nullptr;
 
+    if (m_host)
+    {
+        delete m_host;
+    }
+    if (m_client)
+    {
+        delete m_client;
+    }
+
     //Cleanup networking subsystems
     delete RemoteCommandService::instance;
     RemoteCommandService::instance = nullptr;
@@ -101,57 +110,32 @@ TheGame::~TheGame()
 //-----------------------------------------------------------------------------------
 void TheGame::OnConnectionJoined(NetConnection* cp)
 {
-    if (GetGameState() != GameState::PLAYING)
+    if (m_host)
     {
-        return;
+        m_host->OnConnectionJoined(cp);
     }
-    if (cp->m_index == NetSession::instance->GetMyConnectionIndex())
+    if (m_client)
     {
-        m_localPlayer->m_netOwnerIndex = cp->m_index;
-        return;
-    }
-    else
-    {
-        Link* player = new Link();
-        player->m_netOwnerIndex = cp->m_index;
-        m_players[cp->m_index] = player;
-        m_entities.push_back(player);
+        m_client->OnConnectionJoined(cp);
     }
 }
 
 //-----------------------------------------------------------------------------------
 void TheGame::OnConnectionLeave(NetConnection* cp)
 {
-    if (GetGameState() != GameState::PLAYING)
+    if (m_host)
     {
-        return;
+        m_host->OnConnectionLeave(cp);
     }
-    else if (cp && cp->m_index != NetSession::instance->GetMyConnectionIndex())
+    if (m_client)
     {
-        uint8_t idx = cp->m_index;
-        for (auto iter = m_players.begin(); iter != m_players.end(); ++iter)
-        {
-            Link* networkedPlayer = *iter;
-            if (networkedPlayer->m_netOwnerIndex == idx)
-            {
-                auto entityItr = std::find(m_entities.begin(), m_entities.end(), networkedPlayer);
-                m_entities.erase(entityItr);
-                m_localPlayer = m_localPlayer == networkedPlayer ? nullptr : m_localPlayer;
-                delete networkedPlayer;
-                iter = m_players.erase(iter);                
-                break;
-            }
-        }
+        m_client->OnConnectionLeave(cp);
     }
 }
 
 //-----------------------------------------------------------------------------------
 void TheGame::OnNetTick(NetConnection* cp)
 {
-    if (GetGameState() != GameState::PLAYING)
-    {
-        return;
-    }
     if (m_host)
     {
         m_host->SendNetHostUpdate(cp);
@@ -159,15 +143,6 @@ void TheGame::OnNetTick(NetConnection* cp)
     if (m_client)
     {
         m_client->SendNetClientUpdate(cp);
-    }
-}
-
-//-----------------------------------------------------------------------------------
-void TheGame::OnUpdateReceive(const NetSender& from, NetMessage& message)
-{
-    if (GetGameState() != GameState::PLAYING)
-    {
-        return;
     }
 }
 
@@ -261,13 +236,25 @@ void TheGame::UpdateMainMenu(float deltaSeconds)
 
     if (m_gameplayMapping.IsDown("Host"))
     {
+        m_host = new HostSimulation();
+        m_client = new ClientSimulation();
         Console::instance->RunCommand("nethost Host");
+        while (!NetSession::instance->AmIConnected())
+        {
+            Sleep(100);
+        }
+
         SetGameState(PLAYING);
         InitializePlayingState();
     }
     if (m_gameplayMapping.IsDown("Join"))
     {
+        m_client = new ClientSimulation();
         Console::instance->RunCommand(Stringf("netjoin client %s", NetSystem::SockAddrToString(NetSystem::GetLocalHostAddressUDP("4334"))));
+        while (NetSession::instance->AmIConnected())
+        {
+            Sleep(100);
+        }
 
         SetGameState(PLAYING);
         InitializePlayingState();

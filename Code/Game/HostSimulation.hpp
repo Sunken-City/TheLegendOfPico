@@ -24,6 +24,8 @@ public:
     void InitializeKeyMappings();
     void UninitializeKeyMappings();
     void OnUpdateFromClientReceived(const NetSender& from, NetMessage& message);
+    void OnConnectionJoined(NetConnection* cp);
+    void OnConnectionLeave(NetConnection* cp);
 
     //MEMBER VARIABLES/////////////////////////////////////////////////////////////////////
     std::vector<Link*> m_players;
