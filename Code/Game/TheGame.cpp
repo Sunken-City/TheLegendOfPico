@@ -16,7 +16,7 @@
 #include "Engine/Renderer/BitmapFont.hpp"
 #include "Engine/Input/XMLUtils.hpp"
 #include "Game/Entities/Entity.hpp"
-#include "Game/Entities/Player.hpp"
+#include "Game/Entities/Link.hpp"
 #include "Game/Entities/Bullet.hpp"
 #include "Entities/ItemBox.hpp"
 #include "Entities/Pickup.hpp"
@@ -25,6 +25,9 @@
 #include "Engine/Net/UDPIP/NetSession.hpp"
 #include "Engine/Input/InputDevices.hpp"
 #include "Engine/Net/NetSystem.hpp"
+#include "Engine/Time/Time.hpp"
+#include "Game/HostSimulation.hpp"
+#include "Game/ClientSimulation.hpp"
 
 TheGame* TheGame::instance = nullptr;
 
@@ -35,26 +38,75 @@ float m_timeSinceLastSpawn = 0.0f;
 const float TIME_PER_SPAWN = 1.0f;
 
 //-----------------------------------------------------------------------------------
-void OnUpdateReceiveHelper(const NetSender& from, NetMessage& message)
+void OnClientToHostUpdateReceiveHelper(const NetSender& from, NetMessage& message)
 {
 #pragma todo("Remove this helper and use events for the messages")
-    TheGame::instance->OnUpdateReceive(from, message);
+    if (TheGame::instance->m_host)
+    {
+        TheGame::instance->m_host->OnUpdateFromClientReceived(from, message);
+    }
+}
+
+//-----------------------------------------------------------------------------------
+void OnHostToClientUpdateReceiveHelper(const NetSender& from, NetMessage& message)
+{
+    if (TheGame::instance->m_client)
+    {
+        TheGame::instance->m_client->OnUpdateFromHostReceived(from, message);
+    }
+}
+
+//-----------------------------------------------------------------------------------
+void OnPlayerCreate(const NetSender& from, NetMessage& message)
+{
+    if (TheGame::instance->m_host)
+    {
+        TheGame::instance->m_host->OnPlayerCreate(from, NetMessage(message));
+    }
+    if (TheGame::instance->m_client)
+    {
+        TheGame::instance->m_client->OnPlayerCreate(from, NetMessage(message));
+    }
+}
+
+//-----------------------------------------------------------------------------------
+void OnPlayerDestroy(const NetSender& from, NetMessage& message)
+{
+    if (TheGame::instance->m_host)
+    {
+        TheGame::instance->m_host->OnPlayerDestroy(from, message);
+    }
+    if (TheGame::instance->m_client)
+    {
+        TheGame::instance->m_client->OnPlayerDestroy(from, message);
+    }
 }
 
 //-----------------------------------------------------------------------------------
 TheGame::TheGame()
     : m_debuggingControllerIndex(0)
+    , m_host(nullptr)
+    , m_client(nullptr)
 {
+    //Get a random timestamp seed.
+    LARGE_INTEGER currentCount;
+    QueryPerformanceCounter(&currentCount);
+    srand((unsigned int)currentCount.QuadPart);
+
+    //Initialize resources and keybindings.
     ResourceDatabase::instance = new ResourceDatabase();
     RegisterSprites();
     InitializeKeyMappings();
     SetGameState(GameState::MAIN_MENU);
     InitializeMainMenuState();
 
-    //Initialize networking subsystems
+    //Initialize networking subsystems.
     RemoteCommandService::instance = new RemoteCommandService();
     Console::instance->RunCommand("nsinit");
-    NetSession::instance->RegisterMessage((uint8_t)GAME_UPDATE, "Game Update", &OnUpdateReceiveHelper, (uint32_t)NetMessage::Option::NONE, (uint32_t)NetMessage::Control::NONE);
+    NetSession::instance->RegisterMessage((uint8_t)CLIENT_TO_HOST_UPDATE, "Client to Host Update", &OnClientToHostUpdateReceiveHelper, (uint32_t)NetMessage::Option::NONE, (uint32_t)NetMessage::Control::NONE);
+    NetSession::instance->RegisterMessage((uint8_t)HOST_TO_CLIENT_UPDATE, "Host to Client Update", &OnHostToClientUpdateReceiveHelper, (uint32_t)NetMessage::Option::NONE, (uint32_t)NetMessage::Control::NONE);
+    NetSession::instance->RegisterMessage((uint8_t)PLAYER_CREATE, "Player Create", &OnPlayerCreate, (uint32_t)NetMessage::Option::RELIABLE | (uint32_t)NetMessage::Option::INORDER, (uint32_t)NetMessage::Control::NONE);
+    NetSession::instance->RegisterMessage((uint8_t)PLAYER_DESTROY, "Player Destroy", &OnPlayerDestroy, (uint32_t)NetMessage::Option::RELIABLE | (uint32_t)NetMessage::Option::INORDER, (uint32_t)NetMessage::Control::NONE);
     NetSession::instance->m_OnConnectionJoin.RegisterMethod(this, &TheGame::OnConnectionJoined);
     NetSession::instance->m_OnConnectionLeave.RegisterMethod(this, &TheGame::OnConnectionLeave);
     NetSession::instance->m_OnNetTick.RegisterMethod(this, &TheGame::OnNetTick);
@@ -68,6 +120,15 @@ TheGame::~TheGame()
     delete ResourceDatabase::instance;
     ResourceDatabase::instance = nullptr;
 
+    if (m_host)
+    {
+        delete m_host;
+    }
+    if (m_client)
+    {
+        delete m_client;
+    }
+
     //Cleanup networking subsystems
     delete RemoteCommandService::instance;
     RemoteCommandService::instance = nullptr;
@@ -76,82 +137,39 @@ TheGame::~TheGame()
 //-----------------------------------------------------------------------------------
 void TheGame::OnConnectionJoined(NetConnection* cp)
 {
-    if (GetGameState() != GameState::PLAYING)
+    if (m_host)
     {
-        return;
+        m_host->OnConnectionJoined(cp);
     }
-    if (cp->m_index == NetSession::instance->GetMyConnectionIndex())
+    if (m_client)
     {
-        m_localPlayer->m_netOwnerIndex = cp->m_index;
-        return;
-    }
-    else
-    {
-        Player* player = new Player();
-        player->m_netOwnerIndex = cp->m_index;
-        m_players.push_back(player);
-        m_entities.push_back(player);
+        m_client->OnConnectionJoined(cp);
     }
 }
 
 //-----------------------------------------------------------------------------------
 void TheGame::OnConnectionLeave(NetConnection* cp)
 {
-    if (GetGameState() != GameState::PLAYING)
+    if (m_host)
     {
-        return;
+        m_host->OnConnectionLeave(cp);
     }
-    else if (cp && cp->m_index != NetSession::instance->GetMyConnectionIndex())
+    if (m_client)
     {
-        uint8_t idx = cp->m_index;
-        for (auto iter = m_players.begin(); iter != m_players.end(); ++iter)
-        {
-            Player* networkedPlayer = *iter;
-            if (networkedPlayer->m_netOwnerIndex == idx)
-            {
-                auto entityItr = std::find(m_entities.begin(), m_entities.end(), networkedPlayer);
-                m_entities.erase(entityItr);
-                m_localPlayer = m_localPlayer == networkedPlayer ? nullptr : m_localPlayer;
-                delete networkedPlayer;
-                iter = m_players.erase(iter);                
-                break;
-            }
-        }
+        m_client->OnConnectionLeave(cp);
     }
 }
 
 //-----------------------------------------------------------------------------------
 void TheGame::OnNetTick(NetConnection* cp)
 {
-    if (GetGameState() != GameState::PLAYING || cp->IsMyConnection() || !m_localPlayer)
+    if (m_host)
     {
-        return;
+        m_host->SendNetHostUpdate(cp);
     }
-    NetMessage update(GAME_UPDATE);
-    update.Write<Vector2>(m_localPlayer->m_sprite->m_position);
-    update.Write<Player::Facing>(m_localPlayer->m_facing);
-    cp->SendMessage(update);
-}
-
-//-----------------------------------------------------------------------------------
-void TheGame::OnUpdateReceive(const NetSender& from, NetMessage& message)
-{
-    if (GetGameState() != GameState::PLAYING)
+    if (m_client)
     {
-        return;
-    }
-    if (from.connection)
-    {
-        uint8_t idx = from.connection->m_index;
-        for (Player* networkedPlayer : m_players)
-        {
-            if (networkedPlayer->m_netOwnerIndex == idx)
-            {
-                message.Read<Vector2>(networkedPlayer->m_sprite->m_position);
-                message.Read<Player::Facing>(networkedPlayer->m_facing);
-                break;
-            }
-        }
+        m_client->SendNetClientUpdate(cp);
     }
 }
 
@@ -174,24 +192,14 @@ void TheGame::Update(float deltaSeconds)
     case MAIN_MENU:
         UpdateMainMenu(deltaSeconds);
         break;
-    case STARTUP:
-        break;
     case PLAYING:
         UpdatePlaying(deltaSeconds);
-        break;
-    case PAUSED:
-        //TODO: This will clean up all the game objects because of our callbacks, be careful here.
         break;
     case GAME_OVER:
         UpdateGameOver(deltaSeconds);
         break;
-    case SHUTDOWN:
-        break;
-    case NUM_STATES:
-        break;
     default:
         break;
-
     }
 }
 
@@ -239,7 +247,6 @@ void TheGame::InitializeMainMenuState()
 {
     titleText = new Sprite("TitleText", PLAYER_LAYER);
     titleText->m_scale = Vector2(1.0f, 1.0f);
-    //TODO: SpriteGameRenderer::instance->AddEffectToLayer()
     OnStateSwitch.RegisterMethod(this, &TheGame::CleanupMainMenuState);
 }
 
@@ -256,13 +263,33 @@ void TheGame::UpdateMainMenu(float deltaSeconds)
 
     if (m_gameplayMapping.IsDown("Host"))
     {
+        m_host = new HostSimulation();
+        m_client = new ClientSimulation();
         Console::instance->RunCommand("nethost Host");
+        while (!NetSession::instance->AmIConnected())
+        {
+            Sleep(100);
+        }
+        //Force creation of the host's player and potentially local client player.
+        NetMessage message(GameNetMessages::PLAYER_CREATE);
+        message.Write<uint8_t>(NetSession::instance->m_hostConnection->m_index);
+        NetSession::instance->m_hostConnection->SendMessage(message);
+
+        KeyboardInputDevice* keyboard = InputSystem::instance->m_keyboardDevice;
+        m_gameplayMapping.AddInputAxis("Up", keyboard->FindValue('W'), keyboard->FindValue('S'));
+        m_gameplayMapping.AddInputAxis("Right", keyboard->FindValue('D'), keyboard->FindValue('A'));
+
         SetGameState(PLAYING);
         InitializePlayingState();
     }
     if (m_gameplayMapping.IsDown("Join"))
     {
+        m_client = new ClientSimulation();
         Console::instance->RunCommand(Stringf("netjoin client %s", NetSystem::SockAddrToString(NetSystem::GetLocalHostAddressUDP("4334"))));
+
+        KeyboardInputDevice* keyboard = InputSystem::instance->m_keyboardDevice;
+        m_gameplayMapping.AddInputAxis("Up", keyboard->FindValue('I'), keyboard->FindValue('K'));
+        m_gameplayMapping.AddInputAxis("Right", keyboard->FindValue('L'), keyboard->FindValue('J'));
 
         SetGameState(PLAYING);
         InitializePlayingState();
@@ -280,8 +307,6 @@ void TheGame::RenderMainMenu() const
 void TheGame::InitializeKeyMappings()
 {
     KeyboardInputDevice* keyboard = InputSystem::instance->m_keyboardDevice;
-    m_gameplayMapping.AddInputAxis("Up", keyboard->FindValue('W'), keyboard->FindValue('S'));
-    m_gameplayMapping.AddInputAxis("Right", keyboard->FindValue('D'), keyboard->FindValue('A'));
     m_gameplayMapping.AddInputValue("Attack", keyboard->FindValue(' '));
     m_gameplayMapping.AddInputValue("Host", keyboard->FindValue('H'));
     m_gameplayMapping.AddInputValue("Join", keyboard->FindValue('J'));
@@ -296,9 +321,6 @@ void TheGame::InitializePlayingState()
 {
     testBackground = new Sprite("Map", BACKGROUND_LAYER);
     testBackground->m_scale = Vector2(1.0f, 1.0f);
-    m_localPlayer = new Player();
-    m_entities.push_back(m_localPlayer);
-    m_players.push_back(m_localPlayer);
     SpriteGameRenderer::instance->SetWorldBounds(testBackground->GetBounds());
     OnStateSwitch.RegisterMethod(this, &TheGame::CleanupPlayingState);
 }
@@ -306,12 +328,6 @@ void TheGame::InitializePlayingState()
 //-----------------------------------------------------------------------------------
 void TheGame::CleanupPlayingState(unsigned int)
 {
-    for (Entity* ent : m_entities)
-    {
-        delete ent;
-    }
-    m_entities.clear();
-    m_players.clear();
     delete testBackground;
     SpriteGameRenderer::instance->SetCameraPosition(Vector2::ZERO);
 }
@@ -319,43 +335,13 @@ void TheGame::CleanupPlayingState(unsigned int)
 //-----------------------------------------------------------------------------------
 void TheGame::UpdatePlaying(float deltaSeconds)
 {
-    for (Entity* ent : m_entities)
+    if (NetSession::instance->IsHost())
     {
-        ent->Update(deltaSeconds);
-        for (Entity* other : m_entities)
-        {
-            if ((ent != other) && (ent->IsCollidingWith(other)))
-            {
-                ent->ResolveCollision(other);
-            }
-        }
+        m_host->Update(deltaSeconds);
     }
-    for (Entity* ent : m_newEntities)
+    if (m_client)
     {
-        m_entities.push_back(ent);
-    }
-    m_newEntities.clear();
-    for (auto iter = m_entities.begin(); iter != m_entities.end(); ++iter)
-    {
-        Entity* gameObject = *iter;
-        if (gameObject->m_isDead)
-        {
-            delete gameObject;
-            iter = m_entities.erase(iter);
-        }
-        if (iter == m_entities.end())
-        {
-            break;
-        }
-    }
-    if (!m_localPlayer || m_localPlayer->m_isDead)
-    {
-        SetGameState(GAME_OVER);
-        InitializeGameOverState();
-    }
-    else
-    {
-        SpriteGameRenderer::instance->SetCameraPosition(m_localPlayer->m_sprite->m_position);
+        m_client->Update(deltaSeconds);
     }
 }
 
@@ -399,18 +385,6 @@ void TheGame::RenderGameOver() const
 }
 
 //-----------------------------------------------------------------------------------
-void TheGame::SpawnBullet(Entity* creator)
-{
-    m_newEntities.push_back(new Bullet(creator));
-}
-
-//-----------------------------------------------------------------------------------
-void TheGame::SpawnPickup(const Vector2& spawnPosition)
-{
-    m_newEntities.push_back(new Pickup(spawnPosition));
-}
-
-//-----------------------------------------------------------------------------------
 void TheGame::RegisterSprites()
 {
     ResourceDatabase::instance->RegisterSprite("Map", "Data\\Images\\SymmetryCityMap.png");
@@ -421,12 +395,4 @@ void TheGame::RegisterSprites()
     //-----------------------------------------------------------------------------------
     ResourceDatabase::instance->RegisterSprite("TitleText", "Data\\Images\\Title.png");
     ResourceDatabase::instance->RegisterSprite("GameOverText", "Data\\Images\\GameOver.png");
-}
-
-//-----------------------------------------------------------------------------------
-CONSOLE_COMMAND(cport)
-{
-    UNUSED(args)
-    TheGame::instance->m_debuggingControllerIndex += 1;
-    Console::instance->PrintLine("Incremented Index", RGBA::DISEASED);
 }

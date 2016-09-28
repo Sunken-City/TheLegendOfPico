@@ -1,5 +1,6 @@
 #pragma once
 #include "Engine/Components/Transform3D.hpp"
+#include "Engine/Math/Vector2.hpp"
 
 class Sprite;
 
@@ -17,6 +18,7 @@ public:
 
     //MEMBER VARIABLES/////////////////////////////////////////////////////////////////////
     Sprite* m_sprite;
+    Vector2 m_position;
     float m_defence;
     float m_hp;
     float m_maxHp;

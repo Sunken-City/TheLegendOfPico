@@ -2,7 +2,7 @@
 #include "Engine/Renderer/2D/Sprite.hpp"
 #include "Game/TheGame.hpp"
 #include "Engine/Math/MathUtils.hpp"
-#include "Player.hpp"
+#include "Link.hpp"
 
 //-----------------------------------------------------------------------------------
 Pickup::Pickup(const Vector2& initialPosition)
@@ -61,32 +61,32 @@ void Pickup::Render() const
 void Pickup::ResolveCollision(Entity* otherEntity)
 {
     Entity::ResolveCollision(otherEntity);
-    for (Player* ent : TheGame::instance->m_players)
-    {
-        if ((Entity*)ent == otherEntity)
-        {
-            switch (m_type)
-            {
-            case SPEED:
-                ent->m_speed += 0.5f;
-                break;
-            case POWER:
-                ent->m_power += 0.5f;
-                break;
-            case DEFENCE:
-                ent->m_defence += 0.5f;
-                break;
-            case FIRERATE:
-                ent->m_rateOfFire /= 1.5f;
-                break;
-            case HP:
-                ent->m_hp += 0.5f;
-                ent->m_maxHp += 0.5f;
-                break;
-            default:
-                break;
-            }
-            this->m_isDead = true;
-        }
-    }
+//     for (Link* ent : TheGame::instance->m_players)
+//     {
+//         if ((Entity*)ent == otherEntity)
+//         {
+//             switch (m_type)
+//             {
+//             case SPEED:
+//                 ent->m_speed += 0.5f;
+//                 break;
+//             case POWER:
+//                 ent->m_power += 0.5f;
+//                 break;
+//             case DEFENCE:
+//                 ent->m_defence += 0.5f;
+//                 break;
+//             case FIRERATE:
+//                 ent->m_rateOfFire /= 1.5f;
+//                 break;
+//             case HP:
+//                 ent->m_hp += 0.5f;
+//                 ent->m_maxHp += 0.5f;
+//                 break;
+//             default:
+//                 break;
+//             }
+//             this->m_isDead = true;
+//         }
+//     }
 }

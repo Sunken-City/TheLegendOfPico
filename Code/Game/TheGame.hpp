@@ -1,20 +1,24 @@
 #pragma once
-
 #include <vector>
 #include "Engine/Math/Vector2.hpp"
 #include "Engine/Net/UDPIP/NetMessage.hpp"
 #include "Engine/Input/InputMap.hpp"
 
 class Entity;
-class Player;
+class Link;
 class Ship;
 class NetConnection;
 struct NetSender;
+class HostSimulation;
+class ClientSimulation;
 
 //-----------------------------------------------------------------------------------
 enum GameNetMessages
 {
-    GAME_UPDATE = NetMessage::CoreMessageTypes::NUM_MESSAGES,
+    CLIENT_TO_HOST_UPDATE = NetMessage::CoreMessageTypes::NUM_MESSAGES,
+    HOST_TO_CLIENT_UPDATE,
+    PLAYER_CREATE,
+    PLAYER_DESTROY,
 };
 
 //-----------------------------------------------------------------------------------
@@ -26,11 +30,8 @@ public:
     void OnConnectionJoined(NetConnection* cp);
     void OnConnectionLeave(NetConnection* cp);
     void OnNetTick(NetConnection* cp);
-    void OnUpdateReceive(const NetSender& from, NetMessage& message);
     void Update(float deltaTime);
     void Render() const;
-    void SpawnBullet(Entity* creator);
-    void SpawnPickup(const Vector2& spawnPosition);
 
     static TheGame* instance;
 
@@ -45,10 +46,10 @@ public:
     static unsigned int const UI_LAYER = 30;
 
     //MEMBER VARIABLES/////////////////////////////////////////////////////////////////////
-    std::vector<Player*> m_players;
-    Player* m_localPlayer;
     int m_debuggingControllerIndex;
     InputMap m_gameplayMapping;
+    HostSimulation* m_host;
+    ClientSimulation* m_client;
 
 private:
     TheGame& operator= (const TheGame& other) = delete;
@@ -67,8 +68,4 @@ private:
     void CleanupMainMenuState(unsigned int);
     void UpdateMainMenu(float deltaSeconds);
     void RenderMainMenu() const;
-
-    //MEMBER VARIABLES/////////////////////////////////////////////////////////////////////
-    std::vector<Entity*> m_entities;
-    std::vector<Entity*> m_newEntities;
 };

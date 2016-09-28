@@ -26,17 +26,14 @@
     <ClCompile Include="Entities\Entity.cpp">
       <Filter>General\Entities</Filter>
     </ClCompile>
-    <ClCompile Include="Entities\Player.cpp">
+    <ClCompile Include="Entities\Link.cpp">
       <Filter>General\Entities</Filter>
     </ClCompile>
-    <ClCompile Include="Entities\Bullet.cpp">
-      <Filter>General\Entities</Filter>
+    <ClCompile Include="HostSimulation.cpp">
+      <Filter>General</Filter>
     </ClCompile>
-    <ClCompile Include="Entities\ItemBox.cpp">
-      <Filter>General\Entities</Filter>
-    </ClCompile>
-    <ClCompile Include="Entities\Pickup.cpp">
-      <Filter>General\Entities</Filter>
+    <ClCompile Include="ClientSimulation.cpp">
+      <Filter>General</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -52,17 +49,14 @@
     <ClInclude Include="Entities\Entity.hpp">
       <Filter>General\Entities</Filter>
     </ClInclude>
-    <ClInclude Include="Entities\Player.hpp">
+    <ClInclude Include="Entities\Link.hpp">
       <Filter>General\Entities</Filter>
     </ClInclude>
-    <ClInclude Include="Entities\Bullet.hpp">
-      <Filter>General\Entities</Filter>
+    <ClInclude Include="HostSimulation.hpp">
+      <Filter>General</Filter>
     </ClInclude>
-    <ClInclude Include="Entities\ItemBox.hpp">
-      <Filter>General\Entities</Filter>
-    </ClInclude>
-    <ClInclude Include="Entities\Pickup.hpp">
-      <Filter>General\Entities</Filter>
+    <ClInclude Include="ClientSimulation.hpp">
+      <Filter>General</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

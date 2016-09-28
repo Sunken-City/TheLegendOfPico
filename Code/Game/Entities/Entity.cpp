@@ -10,6 +10,7 @@ Entity::Entity()
     , m_collisionRadius(1.0f)
     , m_age(0.0f)
     , m_isDead(false)
+    , m_position(0.0f)
 {
 
 }
@@ -38,20 +39,21 @@ void Entity::Render() const
 //-----------------------------------------------------------------------------------
 bool Entity::IsCollidingWith(Entity* otherEntity)
 {
-    return this->m_sprite->GetBounds().IsIntersecting(otherEntity->m_sprite->GetBounds());
+    return MathUtils::DoDiscsOverlap(this->m_position, this->m_collisionRadius, otherEntity->m_position, otherEntity->m_collisionRadius);
 }
 
 //-----------------------------------------------------------------------------------
 void Entity::ResolveCollision(Entity* otherEntity)
 {
-    Vector2& myPosition = this->m_sprite->m_position;
-    Vector2 otherPosition = otherEntity->m_sprite->m_position;
+    Vector2& myPosition = m_position;
+    Vector2& otherPosition = otherEntity->m_position;
     Vector2 difference = myPosition - otherPosition;
     float distanceBetweenPoints = MathUtils::CalcDistanceBetweenPoints(otherPosition, myPosition);
     float firstPushDist = (this->m_collisionRadius - distanceBetweenPoints) / 8.f;
-    //float secondPushDist = (otherEntity->m_collisionRadius - distanceBetweenPoints) / 8.f;
-    difference *= -firstPushDist;
+    float secondPushDist = (otherEntity->m_collisionRadius - distanceBetweenPoints) / 8.f;
+    difference *= firstPushDist;
     myPosition -= difference;
+    otherPosition += difference;
 }
 
 //-----------------------------------------------------------------------------------
