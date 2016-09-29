@@ -35,7 +35,6 @@ public:
     uint8_t m_netOwnerIndex;
     Facing m_facing;
     float m_speed;
-    float m_power;
     float m_rateOfFire;
     float m_timeSinceLastShot;
     RGBA m_color;

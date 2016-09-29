@@ -9,6 +9,7 @@
 #include "Engine/Renderer/2D/Sprite.hpp"
 #include "TheGame.hpp"
 #include "Engine/Net/UDPIP/NetSession.hpp"
+#include "Engine/Renderer/2D/ResourceDatabase.hpp"
 
 //-----------------------------------------------------------------------------------
 HostSimulation::HostSimulation()
@@ -89,18 +90,21 @@ void HostSimulation::OnConnectionLeave(NetConnection* cp)
 }
 
 //-----------------------------------------------------------------------------------
-void HostSimulation::OnPlayerDestroy(const NetSender& from, NetMessage message)
+void HostSimulation::OnPlayerDestroy(const NetSender&, NetMessage message)
 {
     uint8_t index = NetSession::INVALID_CONNECTION_INDEX;
     message.Read<uint8_t>(index);
 
     //Entity cleanup will delete the player within the next frame.
-    m_players[index]->m_isDead = true; 
-    m_players[index] = nullptr;
+    if (m_players[index])
+    {
+        m_players[index]->m_isDead = true;
+        m_players[index] = nullptr;
+    }
 }
 
 //-----------------------------------------------------------------------------------
-void HostSimulation::OnPlayerCreate(const NetSender& from, NetMessage message)
+void HostSimulation::OnPlayerCreate(const NetSender&, NetMessage message)
 {
     Link* player = new Link();
     unsigned int color = 0;
@@ -118,15 +122,19 @@ void HostSimulation::OnPlayerCreate(const NetSender& from, NetMessage message)
 //-----------------------------------------------------------------------------------
 void HostSimulation::OnPlayerAttack(const NetSender& from, NetMessage message)
 {
-    bool isRequest = false;
+    bool wasSentARequest = false;
     uint8_t index = from.connection->m_index;
-    message.Read<bool>(isRequest);
+    message.Read<bool>(wasSentARequest);
 
     Link* attackingPlayer = m_players[index];
+    if (!attackingPlayer)
+    {
+        return;
+    }
     Vector2 swordPosition = attackingPlayer->CalculateSwordPosition();
     float swordRotation = attackingPlayer->CalculateSwordRotationDegrees();
 
-    if (isRequest)
+    if (wasSentARequest)
     {
         for (NetConnection* conn : NetSession::instance->m_allConnections)
         {
@@ -147,15 +155,35 @@ void HostSimulation::OnPlayerAttack(const NetSender& from, NetMessage message)
 }
 
 //-----------------------------------------------------------------------------------
-void HostSimulation::OnPlayerDamaged(const NetSender& from, NetMessage message)
-{
-
-}
-
-//-----------------------------------------------------------------------------------
 void HostSimulation::CheckForAndBroadcastDamage(Link* attackingPlayer, const Vector2& swordPosition)
 {
+    AABB2 swordBoundingBox = ResourceDatabase::instance->GetSpriteResource("swordSwing")->GetDefaultBounds();
+    swordBoundingBox += swordPosition;
+    for (Link* player : m_players)
+    {
+        if (player && player != attackingPlayer && swordBoundingBox.IsIntersecting(player->m_sprite->GetBounds()))
+        {
+            NetMessage attack(GameNetMessages::PLAYER_DAMAGED);
+            attack.Write<uint8_t>(player->m_netOwnerIndex);
+            NetMessage died(GameNetMessages::PLAYER_DESTROY);
+            died.Write<uint8_t>(player->m_netOwnerIndex);
 
+            player->m_hp -= 1.0f;
+
+            for (NetConnection* conn : NetSession::instance->m_allConnections)
+            {
+                if (conn)
+                {
+                    conn->SendMessage(attack);
+                    if (player->m_hp <= 0.0f)
+                    {
+                        conn->SendMessage(died);
+                    }
+                }
+            }
+
+        }
+    }
 }
 
 //-----------------------------------------------------------------------------------
@@ -223,18 +251,6 @@ void HostSimulation::CleanUpDeadEntities()
             break;
         }
     }
-}
-
-//-----------------------------------------------------------------------------------
-void HostSimulation::SpawnArrow(Entity* creator)
-{
-    //m_newEntities.push_back(new Bullet(creator));
-}
-
-//-----------------------------------------------------------------------------------
-void HostSimulation::SpawnPickup(const Vector2& spawnPosition)
-{
-    //m_newEntities.push_back(new Pickup(spawnPosition));
 }
 
 //-----------------------------------------------------------------------------------

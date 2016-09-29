@@ -21,8 +21,6 @@ public:
     void UpdateEntities(float deltaSeconds);
     void AddNewEntities();
     void CleanUpDeadEntities();
-    void SpawnArrow(Entity* creator);
-    void SpawnPickup(const Vector2& spawnPosition);
     void InitializeKeyMappings();
     void UninitializeKeyMappings();
     void OnUpdateFromClientReceived(const NetSender& from, NetMessage& message);
@@ -33,7 +31,6 @@ public:
     void OnPlayerDestroy(const NetSender& from, NetMessage message);
     void OnPlayerCreate(const NetSender& from, NetMessage message);
     void OnPlayerAttack(const NetSender& from, NetMessage message);
-    void OnPlayerDamaged(const NetSender& from, NetMessage message);
     void CheckForAndBroadcastDamage(Link* attackingPlayer, const Vector2& swordPosition);
 
     //MEMBER VARIABLES/////////////////////////////////////////////////////////////////////

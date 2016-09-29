@@ -12,8 +12,6 @@ Link::Link(const RGBA& color)
     : Entity()
     , m_netOwnerIndex(0)
     , m_facing(Facing::SOUTH)
-    , m_speed(0.0f)
-    , m_power(0.0f)
     , m_rateOfFire(0.0f)
     , m_timeSinceLastShot(0.0f)
     , m_color(color)
@@ -25,7 +23,7 @@ Link::Link(const RGBA& color)
     m_sprite = new Sprite("pDown", TheGame::PLAYER_LAYER);
     m_sprite->m_scale = Vector2(1.0f, 1.0f);
     m_sprite->m_tintColor = m_color;
-    m_speed = 1.0f;
+    m_speed = 0.0025f;
     m_rateOfFire = 0.5f;
 }
 
@@ -41,7 +39,7 @@ void Link::Update(float deltaSeconds)
     ASSERT_OR_DIE(TheGame::instance->m_host, "Update for the player should not be called on the clients.");
     Entity::Update(deltaSeconds);
     m_timeSinceLastShot += deltaSeconds;
-    float adjustedSpeed = m_speed / 20.0f;
+    float adjustedSpeed = m_speed;
 
     InputMap& input = TheGame::instance->m_host->m_networkMappings[m_netOwnerIndex];
     Vector2 inputDirection = input.GetVector2("Right", "Up");

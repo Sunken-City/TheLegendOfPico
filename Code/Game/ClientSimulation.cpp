@@ -37,6 +37,7 @@ ClientSimulation::~ClientSimulation()
 //-----------------------------------------------------------------------------------
 void ClientSimulation::Update(float deltaSeconds)
 {
+    UNUSED(deltaSeconds);
     if (m_localPlayer)
     {
         SpriteGameRenderer::instance->SetCameraPosition(m_localPlayer->m_position);
@@ -56,7 +57,6 @@ void ClientSimulation::OnUpdateFromHostReceived(const NetSender& from, NetMessag
 {
     if (from.connection)
     {
-        uint8_t idx = from.connection->m_index;
         for (Link* networkedPlayer : m_players)
         {
             if (networkedPlayer)
@@ -84,31 +84,6 @@ void ClientSimulation::SendNetClientUpdate(NetConnection* cp)
 }
 
 //-----------------------------------------------------------------------------------
-void ClientSimulation::OnConnectionJoined(NetConnection* cp)
-{
-
-}
-
-//-----------------------------------------------------------------------------------
-void ClientSimulation::OnConnectionLeave(NetConnection* cp)
-{
-//     uint8_t idx = cp->m_index;
-//     for (auto iter = m_players.begin(); iter != m_players.end(); ++iter)
-//     {
-//         Link* networkedPlayer = *iter;
-//         if (networkedPlayer && networkedPlayer->m_netOwnerIndex == idx)
-//         {
-//             auto entityItr = std::find(m_entities.begin(), m_entities.end(), networkedPlayer);
-//             m_entities.erase(entityItr);
-//             m_localPlayer = m_localPlayer == networkedPlayer ? nullptr : m_localPlayer;
-//             delete networkedPlayer;
-//             iter = m_players.erase(iter);
-//             break;
-//         }
-//     }
-}
-
-//-----------------------------------------------------------------------------------
 void ClientSimulation::OnPlayerCreate(const NetSender& from, NetMessage message)
 {
     UNUSED(from);
@@ -128,7 +103,7 @@ void ClientSimulation::OnPlayerCreate(const NetSender& from, NetMessage message)
 }
 
 //-----------------------------------------------------------------------------------
-void ClientSimulation::OnPlayerDestroy(const NetSender& from, NetMessage message)
+void ClientSimulation::OnPlayerDestroy(const NetSender&, NetMessage message)
 {
     uint8_t index = NetSession::INVALID_CONNECTION_INDEX;
     message.Read<uint8_t>(index);
@@ -146,7 +121,7 @@ void ClientSimulation::OnLocalPlayerAttackInput(const InputValue*)
 }
 
 //-----------------------------------------------------------------------------------
-void ClientSimulation::OnPlayerAttack(const NetSender& from, NetMessage message)
+void ClientSimulation::OnPlayerAttack(const NetSender&, NetMessage message)
 {
     static const SoundID swordSound1 = AudioSystem::instance->CreateOrGetSound("Data\\SFX\\Oracle_Sword_Slash1.wav");
     static const SoundID swordSound2 = AudioSystem::instance->CreateOrGetSound("Data\\SFX\\Oracle_Sword_Slash2.wav");
@@ -185,7 +160,7 @@ void ClientSimulation::OnPlayerAttack(const NetSender& from, NetMessage message)
 }
 
 //-----------------------------------------------------------------------------------
-void ClientSimulation::OnPlayerDamaged(const NetSender& from, NetMessage message)
+void ClientSimulation::OnPlayerDamaged(const NetSender&, NetMessage message)
 {
     static const SoundID hurtSound = AudioSystem::instance->CreateOrGetSound("Data\\SFX\\Oracle_Link_Hurt.wav");
     Link* hurtPlayer = nullptr;

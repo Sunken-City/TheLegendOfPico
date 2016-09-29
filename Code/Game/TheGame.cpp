@@ -98,10 +98,6 @@ void OnPlayerAttack(const NetSender& from, NetMessage& message)
 //-----------------------------------------------------------------------------------
 void OnPlayerDamaged(const NetSender& from, NetMessage& message)
 {
-    if (TheGame::instance->m_host)
-    {
-        TheGame::instance->m_host->OnPlayerDamaged(from, message);
-    }
     if (TheGame::instance->m_client)
     {
         TheGame::instance->m_client->OnPlayerDamaged(from, message);
@@ -170,10 +166,6 @@ void TheGame::OnConnectionJoined(NetConnection* cp)
     {
         m_host->OnConnectionJoined(cp);
     }
-    if (m_client)
-    {
-        m_client->OnConnectionJoined(cp);
-    }
 }
 
 //-----------------------------------------------------------------------------------
@@ -182,10 +174,6 @@ void TheGame::OnConnectionLeave(NetConnection* cp)
     if (m_host)
     {
         m_host->OnConnectionLeave(cp);
-    }
-    if (m_client)
-    {
-        m_client->OnConnectionLeave(cp);
     }
 }
 
