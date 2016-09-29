@@ -19,6 +19,7 @@ enum GameNetMessages
     HOST_TO_CLIENT_UPDATE,
     PLAYER_CREATE,
     PLAYER_DESTROY,
+    PLAYER_ATTACK,
 };
 
 //-----------------------------------------------------------------------------------
@@ -36,11 +37,13 @@ public:
     static TheGame* instance;
 
     //CONSTANTS/////////////////////////////////////////////////////////////////////
+    static const uint8_t MAX_PLAYERS = 8;
+
     static unsigned int const BACKGROUND_LAYER = 0;
     static unsigned int const ITEM_LAYER = 8;
     static unsigned int const ENEMY_LAYER = 9;
     static unsigned int const PLAYER_LAYER = 10;
-    static unsigned int const PLAYER_BULLET_LAYER = 11;
+    static unsigned int const WEAPON_LAYER = 11;
     static unsigned int const ENEMY_BULLET_LAYER = 12;
     static unsigned int const FOREGROUND_LAYER = 20;
     static unsigned int const UI_LAYER = 30;
@@ -57,6 +60,7 @@ private:
     void UpdateGameOver(float deltaSeconds);
     void RenderGameOver() const;
     void RegisterSprites();
+    void RegisterParticleSystems();
     void InitializePlayingState();
     void UpdatePlaying(float deltaSeconds);
     void RenderPlaying() const;

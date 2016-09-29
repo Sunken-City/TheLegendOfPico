@@ -1,5 +1,6 @@
 #pragma once
 #include "Game/Entities/Entity.hpp"
+#include "Engine/Math/Vector2.hpp"
 #include "Engine/Renderer/RGBA.hpp"
 #include <stdint.h>
 
@@ -24,6 +25,8 @@ public:
     virtual void ResolveCollision(Entity* otherEntity);
 
     void UpdateSpriteFromFacing();
+    float CalculateSwordRotationDegrees();
+    Vector2 CalculateSwordPosition();
     Facing GetFacingFromInput(const Vector2& inputDirection);
     void SetColor(unsigned int color);
     void ApplyClientUpdate();

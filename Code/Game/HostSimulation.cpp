@@ -92,13 +92,13 @@ void HostSimulation::OnConnectionLeave(NetConnection* cp)
 }
 
 //-----------------------------------------------------------------------------------
-void HostSimulation::OnPlayerDestroy(const NetSender& from, NetMessage& message)
+void HostSimulation::OnPlayerDestroy(const NetSender& from, NetMessage message)
 {
     throw std::logic_error("The method or operation is not implemented.");
 }
 
 //-----------------------------------------------------------------------------------
-void HostSimulation::OnPlayerCreate(const NetSender& from, NetMessage& message)
+void HostSimulation::OnPlayerCreate(const NetSender& from, NetMessage message)
 {
     Link* player = new Link();
     unsigned int color = 0;
@@ -111,6 +111,34 @@ void HostSimulation::OnPlayerCreate(const NetSender& from, NetMessage& message)
     player->m_sprite->Disable();
     m_players[player->m_netOwnerIndex] = player;
     m_entities.push_back(player);
+}
+
+//-----------------------------------------------------------------------------------
+void HostSimulation::OnPlayerAttack(const NetSender& from, NetMessage message)
+{
+    bool isRequest = false;
+    uint8_t index = from.connection->m_index;
+    message.Read<bool>(isRequest);
+
+    Vector2 swordPosition = m_players[index]->CalculateSwordPosition();
+    float swordRotation = m_players[index]->CalculateSwordRotationDegrees();
+
+    if (isRequest)
+    {
+        for (NetConnection* conn : NetSession::instance->m_allConnections)
+        {
+            if (conn)
+            {
+                bool isRequest = false;
+                NetMessage attackMessage(GameNetMessages::PLAYER_ATTACK);
+                attackMessage.Write<bool>(isRequest);
+                attackMessage.Write<uint8_t>(index);
+                attackMessage.Write<Vector2>(swordPosition);
+                attackMessage.Write<float>(swordRotation);
+                NetSession::instance->m_hostConnection->SendMessage(attackMessage);
+            }
+        }
+    }
 }
 
 //-----------------------------------------------------------------------------------

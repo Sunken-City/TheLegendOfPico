@@ -26,8 +26,11 @@ public:
     void OnUpdateFromClientReceived(const NetSender& from, NetMessage& message);
     void OnConnectionJoined(NetConnection* cp);
     void OnConnectionLeave(NetConnection* cp);
-    void OnPlayerDestroy(const NetSender& from, NetMessage& message);
-    void OnPlayerCreate(const NetSender& from, NetMessage& message);
+
+    //These functions take a copy of the NetMessage intentionally, so that they can read the contents on their own
+    void OnPlayerDestroy(const NetSender& from, NetMessage message);
+    void OnPlayerCreate(const NetSender& from, NetMessage message);
+    void OnPlayerAttack(const NetSender& from, NetMessage message);
 
     //MEMBER VARIABLES/////////////////////////////////////////////////////////////////////
     std::vector<Link*> m_players;

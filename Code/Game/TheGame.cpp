@@ -61,11 +61,11 @@ void OnPlayerCreate(const NetSender& from, NetMessage& message)
 {
     if (TheGame::instance->m_host)
     {
-        TheGame::instance->m_host->OnPlayerCreate(from, NetMessage(message));
+        TheGame::instance->m_host->OnPlayerCreate(from, message);
     }
     if (TheGame::instance->m_client)
     {
-        TheGame::instance->m_client->OnPlayerCreate(from, NetMessage(message));
+        TheGame::instance->m_client->OnPlayerCreate(from, message);
     }
 }
 
@@ -83,6 +83,20 @@ void OnPlayerDestroy(const NetSender& from, NetMessage& message)
 }
 
 //-----------------------------------------------------------------------------------
+void OnPlayerAttack(const NetSender& from, NetMessage& message)
+{
+    if (TheGame::instance->m_host)
+    {
+        TheGame::instance->m_host->OnPlayerAttack(from, message);
+    }
+    if (TheGame::instance->m_client)
+    {
+        TheGame::instance->m_client->OnPlayerAttack(from, message);
+    }
+}
+
+
+//-----------------------------------------------------------------------------------
 TheGame::TheGame()
     : m_debuggingControllerIndex(0)
     , m_host(nullptr)
@@ -96,6 +110,7 @@ TheGame::TheGame()
     //Initialize resources and keybindings.
     ResourceDatabase::instance = new ResourceDatabase();
     RegisterSprites();
+    RegisterParticleSystems();
     InitializeKeyMappings();
     SetGameState(GameState::MAIN_MENU);
     InitializeMainMenuState();
@@ -107,6 +122,7 @@ TheGame::TheGame()
     NetSession::instance->RegisterMessage((uint8_t)HOST_TO_CLIENT_UPDATE, "Host to Client Update", &OnHostToClientUpdateReceiveHelper, (uint32_t)NetMessage::Option::NONE, (uint32_t)NetMessage::Control::NONE);
     NetSession::instance->RegisterMessage((uint8_t)PLAYER_CREATE, "Player Create", &OnPlayerCreate, (uint32_t)NetMessage::Option::RELIABLE | (uint32_t)NetMessage::Option::INORDER, (uint32_t)NetMessage::Control::NONE);
     NetSession::instance->RegisterMessage((uint8_t)PLAYER_DESTROY, "Player Destroy", &OnPlayerDestroy, (uint32_t)NetMessage::Option::RELIABLE | (uint32_t)NetMessage::Option::INORDER, (uint32_t)NetMessage::Control::NONE);
+    NetSession::instance->RegisterMessage((uint8_t)PLAYER_ATTACK, "Player Attack", &OnPlayerAttack, (uint32_t)NetMessage::Option::RELIABLE, (uint32_t)NetMessage::Control::NONE);
     NetSession::instance->m_OnConnectionJoin.RegisterMethod(this, &TheGame::OnConnectionJoined);
     NetSession::instance->m_OnConnectionLeave.RegisterMethod(this, &TheGame::OnConnectionLeave);
     NetSession::instance->m_OnNetTick.RegisterMethod(this, &TheGame::OnNetTick);
@@ -276,11 +292,7 @@ void TheGame::UpdateMainMenu(float deltaSeconds)
         message.Write<uint8_t>(NetSession::instance->m_hostConnection->m_index);
         message.Write<unsigned int>(RGBA::GetRandom().ToUnsignedInt());
         NetSession::instance->m_hostConnection->SendMessage(message);
-
-        KeyboardInputDevice* keyboard = InputSystem::instance->m_keyboardDevice;
-        m_gameplayMapping.AddInputAxis("Up", keyboard->FindValue('W'), keyboard->FindValue('S'));
-        m_gameplayMapping.AddInputAxis("Right", keyboard->FindValue('D'), keyboard->FindValue('A'));
-
+        
         SetGameState(PLAYING);
         InitializePlayingState();
     }
@@ -288,11 +300,7 @@ void TheGame::UpdateMainMenu(float deltaSeconds)
     {
         m_client = new ClientSimulation();
         Console::instance->RunCommand(Stringf("netjoin client %s", NetSystem::SockAddrToString(NetSystem::GetLocalHostAddressUDP("4334"))));
-
-        KeyboardInputDevice* keyboard = InputSystem::instance->m_keyboardDevice;
-        m_gameplayMapping.AddInputAxis("Up", keyboard->FindValue('I'), keyboard->FindValue('K'));
-        m_gameplayMapping.AddInputAxis("Right", keyboard->FindValue('L'), keyboard->FindValue('J'));
-
+        
         SetGameState(PLAYING);
         InitializePlayingState();
     }
@@ -309,6 +317,8 @@ void TheGame::RenderMainMenu() const
 void TheGame::InitializeKeyMappings()
 {
     KeyboardInputDevice* keyboard = InputSystem::instance->m_keyboardDevice;
+    m_gameplayMapping.AddInputAxis("Up", keyboard->FindValue('W'), keyboard->FindValue('S'));
+    m_gameplayMapping.AddInputAxis("Right", keyboard->FindValue('D'), keyboard->FindValue('A'));
     m_gameplayMapping.AddInputValue("Attack", keyboard->FindValue(' '));
     m_gameplayMapping.AddInputValue("Host", keyboard->FindValue('H'));
     m_gameplayMapping.AddInputValue("Join", keyboard->FindValue('J'));
@@ -394,7 +404,20 @@ void TheGame::RegisterSprites()
     ResourceDatabase::instance->RegisterSprite("pUp", "Data\\Images\\standingUp.png");
     ResourceDatabase::instance->RegisterSprite("pRight", "Data\\Images\\standingRight.png");
     ResourceDatabase::instance->RegisterSprite("pLeft", "Data\\Images\\standingLeft.png");
-    //-----------------------------------------------------------------------------------
+    ResourceDatabase::instance->RegisterSprite("swordSwing", "Data\\Images\\swordSwing.png");
+
     ResourceDatabase::instance->RegisterSprite("TitleText", "Data\\Images\\Title.png");
     ResourceDatabase::instance->RegisterSprite("GameOverText", "Data\\Images\\GameOver.png");
+}
+
+//-----------------------------------------------------------------------------------
+void TheGame::RegisterParticleSystems()
+{
+    ParticleSystemDefinition* swordAttackSystem = ResourceDatabase::instance->RegisterParticleSystem("SwordAttack", ONE_SHOT);
+    ParticleEmitterDefinition* swordAttackEmitter = new ParticleEmitterDefinition(ResourceDatabase::instance->GetSpriteResource("swordSwing"));
+    swordAttackEmitter->m_initialNumParticlesSpawn = 1;
+    swordAttackEmitter->m_lifetimePerParticle = 0.5f;
+    swordAttackEmitter->m_material = swordAttackEmitter->m_spriteResource->m_defaultMaterial;
+    swordAttackEmitter->m_particlesPerSecond = 0.0f;
+    swordAttackSystem->AddEmitter(swordAttackEmitter);
 }

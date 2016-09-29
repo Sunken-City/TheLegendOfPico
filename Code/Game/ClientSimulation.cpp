@@ -18,6 +18,7 @@ ClientSimulation::ClientSimulation()
     {
         m_players.push_back(nullptr);
     }
+    TheGame::instance->m_gameplayMapping.FindInputValue("Attack")->m_OnPress.RegisterMethod(this, &ClientSimulation::OnLocalPlayerAttackInput);
 }
 
 //-----------------------------------------------------------------------------------
@@ -106,8 +107,9 @@ void ClientSimulation::OnConnectionLeave(NetConnection* cp)
 }
 
 //-----------------------------------------------------------------------------------
-void ClientSimulation::OnPlayerCreate(const NetSender& from, NetMessage& message)
+void ClientSimulation::OnPlayerCreate(const NetSender& from, NetMessage message)
 {
+    UNUSED(from);
     Link* player = new Link();
     unsigned int color = 0;
 
@@ -124,9 +126,39 @@ void ClientSimulation::OnPlayerCreate(const NetSender& from, NetMessage& message
     }
 }
 
-
 //-----------------------------------------------------------------------------------
-void ClientSimulation::OnPlayerDestroy(const NetSender& from, NetMessage& message)
+void ClientSimulation::OnPlayerDestroy(const NetSender& from, NetMessage message)
 {
     throw std::logic_error("The method or operation is not implemented.");
+}
+
+//-----------------------------------------------------------------------------------
+void ClientSimulation::OnLocalPlayerAttackInput(const InputValue*)
+{
+    bool isRequest = true;
+    NetMessage attackMessage(GameNetMessages::PLAYER_ATTACK);
+    attackMessage.Write<bool>(isRequest);
+    NetSession::instance->m_hostConnection->SendMessage(attackMessage);
+}
+
+//-----------------------------------------------------------------------------------
+void ClientSimulation::OnPlayerAttack(const NetSender& from, NetMessage message)
+{
+    bool isRequest = true;
+    uint8_t index = NetSession::INVALID_CONNECTION_INDEX;
+    Vector2 swordPosition(0.0f);
+    float swordRotation(0.0f);
+    Link* attackingPlayer;
+    message.Read<bool>(isRequest);
+    message.Read<uint8_t>(index);
+    message.Read<Vector2>(swordPosition);
+    message.Read<float>(swordRotation);
+
+    if (!isRequest)
+    {
+        ASSERT_OR_DIE(index < TheGame::MAX_PLAYERS, "Invalid index attached to attack message");
+        attackingPlayer = m_players[index];
+
+        ParticleSystem::PlayOneShotParticleEffect("SwordAttack", TheGame::WEAPON_LAYER, swordPosition, swordRotation);
+    }
 }

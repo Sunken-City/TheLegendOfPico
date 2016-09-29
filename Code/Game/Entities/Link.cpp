@@ -75,19 +75,54 @@ void Link::UpdateSpriteFromFacing()
     switch (m_facing)
     {
     case Link::WEST:
-        m_sprite->m_spriteResource = ResourceDatabase::instance->GetSpriteResource("pRight");
+        m_sprite->m_spriteResource = ResourceDatabase::instance->GetSpriteResource("pLeft");
         break;
     case Link::NORTH:
         m_sprite->m_spriteResource = ResourceDatabase::instance->GetSpriteResource("pUp");
         break;
     case Link::EAST:
-        m_sprite->m_spriteResource = ResourceDatabase::instance->GetSpriteResource("pLeft");
+        m_sprite->m_spriteResource = ResourceDatabase::instance->GetSpriteResource("pRight");
         break;
     case Link::SOUTH:
         m_sprite->m_spriteResource = ResourceDatabase::instance->GetSpriteResource("pDown");
         break;
     default:
         break;
+    }
+}
+
+float Link::CalculateSwordRotationDegrees()
+{
+    switch (m_facing)
+    {
+    case WEST:
+        return 180.0f;
+    case NORTH:
+        return 270.0f;
+    case EAST:
+        return 0.0f;
+    case SOUTH:
+        return 90.0f;
+    default:
+        ERROR_AND_DIE("Invalid state for facing");
+    }
+}
+
+//-----------------------------------------------------------------------------------
+Vector2 Link::CalculateSwordPosition()
+{
+    switch (m_facing)
+    {
+    case WEST:
+        return m_sprite->GetBounds().mins;
+    case NORTH:
+        return m_sprite->GetBounds().GetTopLeft();
+    case EAST:
+        return m_sprite->GetBounds().maxs;
+    case SOUTH:
+        return m_sprite->GetBounds().GetBottomRight();
+    default:
+        ERROR_AND_DIE("Invalid state for facing");
     }
 }
 
@@ -113,12 +148,12 @@ Link::Facing Link::GetFacingFromInput(const Vector2& inputDirection)
     if (1.0f - rightward < bestDifference)
     {
         bestDifference = 1.0f - rightward;
-        bestDirection = Facing::WEST;
+        bestDirection = Facing::EAST;
     }
     if (1.0f - leftward < bestDifference)
     {
         bestDifference = 1.0f - leftward;
-        bestDirection = Facing::EAST;
+        bestDirection = Facing::WEST;
     }
     return bestDirection;
 }
