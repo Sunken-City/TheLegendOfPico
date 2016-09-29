@@ -20,6 +20,7 @@ enum GameNetMessages
     PLAYER_CREATE,
     PLAYER_DESTROY,
     PLAYER_ATTACK,
+    PLAYER_DAMAGED,
 };
 
 //-----------------------------------------------------------------------------------

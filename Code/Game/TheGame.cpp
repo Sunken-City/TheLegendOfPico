@@ -95,6 +95,18 @@ void OnPlayerAttack(const NetSender& from, NetMessage& message)
     }
 }
 
+//-----------------------------------------------------------------------------------
+void OnPlayerDamaged(const NetSender& from, NetMessage& message)
+{
+    if (TheGame::instance->m_host)
+    {
+        TheGame::instance->m_host->OnPlayerDamaged(from, message);
+    }
+    if (TheGame::instance->m_client)
+    {
+        TheGame::instance->m_client->OnPlayerDamaged(from, message);
+    }
+}
 
 //-----------------------------------------------------------------------------------
 TheGame::TheGame()
@@ -123,6 +135,7 @@ TheGame::TheGame()
     NetSession::instance->RegisterMessage((uint8_t)PLAYER_CREATE, "Player Create", &OnPlayerCreate, (uint32_t)NetMessage::Option::RELIABLE | (uint32_t)NetMessage::Option::INORDER, (uint32_t)NetMessage::Control::NONE);
     NetSession::instance->RegisterMessage((uint8_t)PLAYER_DESTROY, "Player Destroy", &OnPlayerDestroy, (uint32_t)NetMessage::Option::RELIABLE | (uint32_t)NetMessage::Option::INORDER, (uint32_t)NetMessage::Control::NONE);
     NetSession::instance->RegisterMessage((uint8_t)PLAYER_ATTACK, "Player Attack", &OnPlayerAttack, (uint32_t)NetMessage::Option::RELIABLE, (uint32_t)NetMessage::Control::NONE);
+    NetSession::instance->RegisterMessage((uint8_t)PLAYER_DAMAGED, "Player Damaged", &OnPlayerDamaged, (uint32_t)NetMessage::Option::RELIABLE, (uint32_t)NetMessage::Control::NONE);
     NetSession::instance->m_OnConnectionJoin.RegisterMethod(this, &TheGame::OnConnectionJoined);
     NetSession::instance->m_OnConnectionLeave.RegisterMethod(this, &TheGame::OnConnectionLeave);
     NetSession::instance->m_OnNetTick.RegisterMethod(this, &TheGame::OnNetTick);

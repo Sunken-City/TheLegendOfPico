@@ -25,6 +25,7 @@ public:
     void OnPlayerDestroy(const NetSender& from, NetMessage message);
     void OnLocalPlayerAttackInput(const InputValue* attackInput);
     void OnPlayerAttack(const NetSender& from, NetMessage message);
+    void OnPlayerDamaged(const NetSender& from, NetMessage message);
 
     //MEMBER VARIABLES/////////////////////////////////////////////////////////////////////
     Link* m_localPlayer;

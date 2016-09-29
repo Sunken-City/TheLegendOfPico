@@ -156,7 +156,7 @@ void ClientSimulation::OnPlayerAttack(const NetSender& from, NetMessage message)
     uint8_t index = NetSession::INVALID_CONNECTION_INDEX;
     Vector2 swordPosition(0.0f);
     float swordRotation(0.0f);
-    Link* attackingPlayer;
+    Link* attackingPlayer = nullptr;
     message.Read<bool>(isRequest);
     message.Read<uint8_t>(index);
     message.Read<Vector2>(swordPosition);
@@ -182,4 +182,19 @@ void ClientSimulation::OnPlayerAttack(const NetSender& from, NetMessage message)
             break;
         }
     }
+}
+
+//-----------------------------------------------------------------------------------
+void ClientSimulation::OnPlayerDamaged(const NetSender& from, NetMessage message)
+{
+    static const SoundID hurtSound = AudioSystem::instance->CreateOrGetSound("Data\\SFX\\Oracle_Link_Hurt.wav");
+    Link* hurtPlayer = nullptr;
+    uint8_t index = NetSession::INVALID_CONNECTION_INDEX;
+
+    message.Read<uint8_t>(index);
+
+    ASSERT_OR_DIE(index < TheGame::MAX_PLAYERS, "Invalid index attached to attack message");
+    hurtPlayer = m_players[index];
+
+    AudioSystem::instance->PlaySound(hurtSound);
 }

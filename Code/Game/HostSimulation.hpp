@@ -33,6 +33,8 @@ public:
     void OnPlayerDestroy(const NetSender& from, NetMessage message);
     void OnPlayerCreate(const NetSender& from, NetMessage message);
     void OnPlayerAttack(const NetSender& from, NetMessage message);
+    void OnPlayerDamaged(const NetSender& from, NetMessage message);
+    void CheckForAndBroadcastDamage(Link* attackingPlayer, const Vector2& swordPosition);
 
     //MEMBER VARIABLES/////////////////////////////////////////////////////////////////////
     std::vector<Link*> m_players;

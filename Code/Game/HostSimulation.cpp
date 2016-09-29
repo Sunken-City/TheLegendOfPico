@@ -122,8 +122,9 @@ void HostSimulation::OnPlayerAttack(const NetSender& from, NetMessage message)
     uint8_t index = from.connection->m_index;
     message.Read<bool>(isRequest);
 
-    Vector2 swordPosition = m_players[index]->CalculateSwordPosition();
-    float swordRotation = m_players[index]->CalculateSwordRotationDegrees();
+    Link* attackingPlayer = m_players[index];
+    Vector2 swordPosition = attackingPlayer->CalculateSwordPosition();
+    float swordRotation = attackingPlayer->CalculateSwordRotationDegrees();
 
     if (isRequest)
     {
@@ -140,7 +141,21 @@ void HostSimulation::OnPlayerAttack(const NetSender& from, NetMessage message)
                 conn->SendMessage(attackMessage);
             }
         }
+
+        CheckForAndBroadcastDamage(attackingPlayer, swordPosition);
     }
+}
+
+//-----------------------------------------------------------------------------------
+void HostSimulation::OnPlayerDamaged(const NetSender& from, NetMessage message)
+{
+
+}
+
+//-----------------------------------------------------------------------------------
+void HostSimulation::CheckForAndBroadcastDamage(Link* attackingPlayer, const Vector2& swordPosition)
+{
+
 }
 
 //-----------------------------------------------------------------------------------
