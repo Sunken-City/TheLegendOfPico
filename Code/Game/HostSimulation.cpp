@@ -76,17 +76,14 @@ void HostSimulation::OnConnectionJoined(NetConnection* cp)
 //-----------------------------------------------------------------------------------
 void HostSimulation::OnConnectionLeave(NetConnection* cp)
 {
-    uint8_t idx = cp->m_index;
-    for (auto iter = m_players.begin(); iter != m_players.end(); ++iter)
+    //Let everyone know about the guy who just disconnected (Including ourselves!).
+    for (NetConnection* conn : NetSession::instance->m_allConnections)
     {
-        Link* networkedPlayer = *iter;
-        if (networkedPlayer && networkedPlayer->m_netOwnerIndex == idx)
+        if (conn)
         {
-            auto entityItr = std::find(m_entities.begin(), m_entities.end(), networkedPlayer);
-            m_entities.erase(entityItr);
-            delete networkedPlayer;
-            iter = m_players.erase(iter);
-            break;
+            NetMessage message(GameNetMessages::PLAYER_DESTROY);
+            message.Write<uint8_t>(cp->m_index);
+            conn->SendMessage(message);
         }
     }
 }
@@ -94,7 +91,12 @@ void HostSimulation::OnConnectionLeave(NetConnection* cp)
 //-----------------------------------------------------------------------------------
 void HostSimulation::OnPlayerDestroy(const NetSender& from, NetMessage message)
 {
-    throw std::logic_error("The method or operation is not implemented.");
+    uint8_t index = NetSession::INVALID_CONNECTION_INDEX;
+    message.Read<uint8_t>(index);
+
+    //Entity cleanup will delete the player within the next frame.
+    m_players[index]->m_isDead = true; 
+    m_players[index] = nullptr;
 }
 
 //-----------------------------------------------------------------------------------

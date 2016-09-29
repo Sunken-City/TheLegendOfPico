@@ -91,6 +91,7 @@ void Link::UpdateSpriteFromFacing()
     }
 }
 
+//-----------------------------------------------------------------------------------
 float Link::CalculateSwordRotationDegrees()
 {
     switch (m_facing)

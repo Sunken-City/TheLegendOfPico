@@ -29,6 +29,4 @@ public:
     //MEMBER VARIABLES/////////////////////////////////////////////////////////////////////
     Link* m_localPlayer;
     std::vector<Link*> m_players;
-    std::vector<Entity*> m_entities;
-    std::vector<Entity*> m_newEntities;
 };

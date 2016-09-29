@@ -27,11 +27,10 @@ ClientSimulation::ClientSimulation()
 //-----------------------------------------------------------------------------------
 ClientSimulation::~ClientSimulation()
 {
-    for (Entity* ent : m_entities)
+    for (Link* link : m_players)
     {
-        delete ent;
+        delete link;
     }
-    m_entities.clear();
     m_players.clear();
 }
 
@@ -93,20 +92,20 @@ void ClientSimulation::OnConnectionJoined(NetConnection* cp)
 //-----------------------------------------------------------------------------------
 void ClientSimulation::OnConnectionLeave(NetConnection* cp)
 {
-    uint8_t idx = cp->m_index;
-    for (auto iter = m_players.begin(); iter != m_players.end(); ++iter)
-    {
-        Link* networkedPlayer = *iter;
-        if (networkedPlayer && networkedPlayer->m_netOwnerIndex == idx)
-        {
-            auto entityItr = std::find(m_entities.begin(), m_entities.end(), networkedPlayer);
-            m_entities.erase(entityItr);
-            m_localPlayer = m_localPlayer == networkedPlayer ? nullptr : m_localPlayer;
-            delete networkedPlayer;
-            iter = m_players.erase(iter);
-            break;
-        }
-    }
+//     uint8_t idx = cp->m_index;
+//     for (auto iter = m_players.begin(); iter != m_players.end(); ++iter)
+//     {
+//         Link* networkedPlayer = *iter;
+//         if (networkedPlayer && networkedPlayer->m_netOwnerIndex == idx)
+//         {
+//             auto entityItr = std::find(m_entities.begin(), m_entities.end(), networkedPlayer);
+//             m_entities.erase(entityItr);
+//             m_localPlayer = m_localPlayer == networkedPlayer ? nullptr : m_localPlayer;
+//             delete networkedPlayer;
+//             iter = m_players.erase(iter);
+//             break;
+//         }
+//     }
 }
 
 //-----------------------------------------------------------------------------------
@@ -122,7 +121,6 @@ void ClientSimulation::OnPlayerCreate(const NetSender& from, NetMessage message)
 
     player->SetColor(color);
     m_players[player->m_netOwnerIndex] = player;
-    m_entities.push_back(player);
     if (player->m_netOwnerIndex == NetSession::instance->GetMyConnectionIndex())
     {
         m_localPlayer = player;
@@ -132,7 +130,10 @@ void ClientSimulation::OnPlayerCreate(const NetSender& from, NetMessage message)
 //-----------------------------------------------------------------------------------
 void ClientSimulation::OnPlayerDestroy(const NetSender& from, NetMessage message)
 {
-    throw std::logic_error("The method or operation is not implemented.");
+    uint8_t index = NetSession::INVALID_CONNECTION_INDEX;
+    message.Read<uint8_t>(index);
+    delete m_players[index];
+    m_players[index] = nullptr;
 }
 
 //-----------------------------------------------------------------------------------

@@ -11,9 +11,11 @@ struct NetSender;
 class HostSimulation
 {
 public:
+    //CONSTRUCTORS/////////////////////////////////////////////////////////////////////
     HostSimulation();
     ~HostSimulation();
 
+    //FUNCTIONS/////////////////////////////////////////////////////////////////////
     void SendNetHostUpdate(NetConnection* cp);
     void Update(float deltaSeconds);
     void UpdateEntities(float deltaSeconds);
