@@ -19,8 +19,6 @@ public:
     void Update(float deltaSeconds);
     void OnUpdateFromHostReceived(const NetSender& from, NetMessage& message);
     void SendNetClientUpdate(NetConnection* cp);
-    void OnConnectionJoined(NetConnection* cp);
-    void OnConnectionLeave(NetConnection* cp);
     void OnPlayerCreate(const NetSender& from, NetMessage message);
     void OnPlayerDestroy(const NetSender& from, NetMessage message);
     void OnLocalPlayerAttackInput(const InputValue* attackInput);
