@@ -109,7 +109,13 @@ void ClientSimulation::OnConnectionLeave(NetConnection* cp)
 void ClientSimulation::OnPlayerCreate(const NetSender& from, NetMessage& message)
 {
     Link* player = new Link();
+    unsigned int color = 0;
+
+    //Read in link data
     message.Read<uint8_t>(player->m_netOwnerIndex);
+    message.Read<unsigned int>(color);
+
+    player->SetColor(color);
     m_players[player->m_netOwnerIndex] = player;
     m_entities.push_back(player);
     if (player->m_netOwnerIndex == NetSession::instance->GetMyConnectionIndex())

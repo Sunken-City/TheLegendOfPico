@@ -8,7 +8,7 @@
 #include "Game/HostSimulation.hpp"
 
 //-----------------------------------------------------------------------------------
-Link::Link()
+Link::Link(const RGBA& color) 
     : Entity()
     , m_netOwnerIndex(0)
     , m_facing(Facing::SOUTH)
@@ -16,7 +16,7 @@ Link::Link()
     , m_power(0.0f)
     , m_rateOfFire(0.0f)
     , m_timeSinceLastShot(0.0f)
-    , m_color(RGBA::GetRandom())
+    , m_color(color)
 {
     m_collisionRadius = 0.3f;
     m_isDead = false;
@@ -121,6 +121,16 @@ Link::Facing Link::GetFacingFromInput(const Vector2& inputDirection)
         bestDirection = Facing::EAST;
     }
     return bestDirection;
+}
+
+//-----------------------------------------------------------------------------------
+void Link::SetColor(unsigned int color)
+{
+    m_color = RGBA(color);
+    if (m_sprite)
+    {
+        m_sprite->m_tintColor = m_color;
+    }
 }
 
 //-----------------------------------------------------------------------------------

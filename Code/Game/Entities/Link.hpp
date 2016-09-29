@@ -15,7 +15,7 @@ public:
         NUM_DIRECTIONS
     };
 
-    Link();
+    Link(const RGBA& color = RGBA::WHITE);
     ~Link();
 
     //FUNCTIONS/////////////////////////////////////////////////////////////////////
@@ -25,6 +25,7 @@ public:
 
     void UpdateSpriteFromFacing();
     Facing GetFacingFromInput(const Vector2& inputDirection);
+    void SetColor(unsigned int color);
     void ApplyClientUpdate();
 
     //MEMBER VARIABLES/////////////////////////////////////////////////////////////////////

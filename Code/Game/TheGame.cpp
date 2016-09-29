@@ -270,9 +270,11 @@ void TheGame::UpdateMainMenu(float deltaSeconds)
         {
             Sleep(100);
         }
+
         //Force creation of the host's player and potentially local client player.
         NetMessage message(GameNetMessages::PLAYER_CREATE);
         message.Write<uint8_t>(NetSession::instance->m_hostConnection->m_index);
+        message.Write<unsigned int>(RGBA::GetRandom().ToUnsignedInt());
         NetSession::instance->m_hostConnection->SendMessage(message);
 
         KeyboardInputDevice* keyboard = InputSystem::instance->m_keyboardDevice;

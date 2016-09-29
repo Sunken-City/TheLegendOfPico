@@ -47,6 +47,7 @@ void HostSimulation::OnUpdateFromClientReceived(const NetSender& from, NetMessag
 //-----------------------------------------------------------------------------------
 void HostSimulation::OnConnectionJoined(NetConnection* cp)
 {
+    RGBA newLinkColor = RGBA::GetRandom();
     //Let everyone know about the guy we just created (Including ourselves!).
     for (NetConnection* conn : NetSession::instance->m_allConnections)
     {
@@ -54,6 +55,7 @@ void HostSimulation::OnConnectionJoined(NetConnection* cp)
         {
             NetMessage message(GameNetMessages::PLAYER_CREATE);
             message.Write<uint8_t>(cp->m_index);
+            message.Write<unsigned int>(newLinkColor.ToUnsignedInt());
             conn->SendMessage(message);
         }
     }
@@ -65,6 +67,7 @@ void HostSimulation::OnConnectionJoined(NetConnection* cp)
         {
             NetMessage message(GameNetMessages::PLAYER_CREATE);
             message.Write<uint8_t>(link->m_netOwnerIndex);
+            message.Write<unsigned int>(link->m_color.ToUnsignedInt());
             cp->SendMessage(message);
         }
     }
@@ -98,9 +101,14 @@ void HostSimulation::OnPlayerDestroy(const NetSender& from, NetMessage& message)
 void HostSimulation::OnPlayerCreate(const NetSender& from, NetMessage& message)
 {
     Link* player = new Link();
+    unsigned int color = 0;
+
+    //Read the link data
     message.Read<uint8_t>(player->m_netOwnerIndex);
-    delete player->m_sprite; //Host has no graphics, delete the sprite
-    player->m_sprite = nullptr;
+    message.Read<unsigned int>(color);
+
+    player->SetColor(color);
+    player->m_sprite->Disable();
     m_players[player->m_netOwnerIndex] = player;
     m_entities.push_back(player);
 }
