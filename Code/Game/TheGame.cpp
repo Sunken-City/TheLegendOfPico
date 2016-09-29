@@ -416,8 +416,9 @@ void TheGame::RegisterParticleSystems()
     ParticleSystemDefinition* swordAttackSystem = ResourceDatabase::instance->RegisterParticleSystem("SwordAttack", ONE_SHOT);
     ParticleEmitterDefinition* swordAttackEmitter = new ParticleEmitterDefinition(ResourceDatabase::instance->GetSpriteResource("swordSwing"));
     swordAttackEmitter->m_initialNumParticlesSpawn = 1;
-    swordAttackEmitter->m_lifetimePerParticle = 0.5f;
+    swordAttackEmitter->m_lifetimePerParticle = 0.1f;
     swordAttackEmitter->m_material = swordAttackEmitter->m_spriteResource->m_defaultMaterial;
     swordAttackEmitter->m_particlesPerSecond = 0.0f;
+    swordAttackEmitter->m_fadeoutEnabled = false;
     swordAttackSystem->AddEmitter(swordAttackEmitter);
 }

@@ -8,6 +8,9 @@
 #include "Engine/Net/UDPIP/NetSession.hpp"
 #include "Engine/Input/InputValues.hpp"
 #include "Engine/Math/Vector2.hpp"
+#include "Engine/Renderer/2D/ResourceDatabase.hpp"
+#include "Engine/Renderer/2D/ParticleSystemDefinition.hpp"
+#include "Engine/Audio/Audio.hpp"
 
 //-----------------------------------------------------------------------------------
 ClientSimulation::ClientSimulation()
@@ -144,6 +147,10 @@ void ClientSimulation::OnLocalPlayerAttackInput(const InputValue*)
 //-----------------------------------------------------------------------------------
 void ClientSimulation::OnPlayerAttack(const NetSender& from, NetMessage message)
 {
+    static const SoundID swordSound1 = AudioSystem::instance->CreateOrGetSound("Data\\SFX\\Oracle_Sword_Slash1.wav");
+    static const SoundID swordSound2 = AudioSystem::instance->CreateOrGetSound("Data\\SFX\\Oracle_Sword_Slash2.wav");
+    static const SoundID swordSound3 = AudioSystem::instance->CreateOrGetSound("Data\\SFX\\Oracle_Sword_Slash3.wav");
+
     bool isRequest = true;
     uint8_t index = NetSession::INVALID_CONNECTION_INDEX;
     Vector2 swordPosition(0.0f);
@@ -159,6 +166,19 @@ void ClientSimulation::OnPlayerAttack(const NetSender& from, NetMessage message)
         ASSERT_OR_DIE(index < TheGame::MAX_PLAYERS, "Invalid index attached to attack message");
         attackingPlayer = m_players[index];
 
+        ResourceDatabase::instance->GetParticleSystemResource("SwordAttack")->m_emitterDefinitions[0]->m_initialTintPerParticle = attackingPlayer->m_color;
         ParticleSystem::PlayOneShotParticleEffect("SwordAttack", TheGame::WEAPON_LAYER, swordPosition, swordRotation);
+
+        switch (MathUtils::GetRandomIntFromZeroTo(3))
+        {
+        case 0:
+            AudioSystem::instance->PlaySound(swordSound1);
+        case 1:
+            AudioSystem::instance->PlaySound(swordSound2);
+        case 2:
+            AudioSystem::instance->PlaySound(swordSound3);
+        default:
+            break;
+        }
     }
 }

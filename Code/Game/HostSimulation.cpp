@@ -135,7 +135,7 @@ void HostSimulation::OnPlayerAttack(const NetSender& from, NetMessage message)
                 attackMessage.Write<uint8_t>(index);
                 attackMessage.Write<Vector2>(swordPosition);
                 attackMessage.Write<float>(swordRotation);
-                NetSession::instance->m_hostConnection->SendMessage(attackMessage);
+                conn->SendMessage(attackMessage);
             }
         }
     }
