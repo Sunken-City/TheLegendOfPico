@@ -300,7 +300,7 @@ void TheGame::UpdateMainMenu(float deltaSeconds)
     if (m_gameplayMapping.IsDown("Join"))
     {
         m_client = new ClientSimulation();
-        Console::instance->RunCommand(Stringf("netjoin client %s", NetSystem::SockAddrToString(NetSystem::GetLocalHostAddressUDP("4334"))));
+        Console::instance->RunCommand(Stringf("netjoin client%i %s", rand(), NetSystem::SockAddrToString(NetSystem::GetLocalHostAddressUDP("4334"))));
         
         SetGameState(PLAYING);
         InitializePlayingState();

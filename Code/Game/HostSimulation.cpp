@@ -163,18 +163,30 @@ void HostSimulation::CheckForAndBroadcastDamage(Link* attackingPlayer, const Vec
     {
         if (player && player != attackingPlayer && swordBoundingBox.IsIntersecting(player->m_sprite->GetBounds()))
         {
+            //Update the damaged player
+            Vector2 fromAttackerToDefender = player->m_position - attackingPlayer->m_position;
+            fromAttackerToDefender.Normalize();
+            float distFromAttackerToDefender = MathUtils::CalcDistanceBetweenPoints(player->m_position, attackingPlayer->m_position);
+            float distFromSwordToDefender = MathUtils::CalcDistanceBetweenPoints(swordPosition, attackingPlayer->m_position);
+            player->m_position += fromAttackerToDefender * (distFromSwordToDefender / distFromAttackerToDefender);
+            player->m_hp -= 1.0f;
+
+            //Create messages
             NetMessage attack(GameNetMessages::PLAYER_DAMAGED);
             attack.Write<uint8_t>(player->m_netOwnerIndex);
             NetMessage died(GameNetMessages::PLAYER_DESTROY);
             died.Write<uint8_t>(player->m_netOwnerIndex);
+            NetMessage update(GameNetMessages::HOST_TO_CLIENT_UPDATE);
+            update.Write<Vector2>(player->m_position);
+            update.Write<Link::Facing>(player->m_facing);
 
-            player->m_hp -= 1.0f;
 
             for (NetConnection* conn : NetSession::instance->m_allConnections)
             {
                 if (conn)
                 {
                     conn->SendMessage(attack);
+                    conn->SendMessage(update);
                     if (player->m_hp <= 0.0f)
                     {
                         conn->SendMessage(died);

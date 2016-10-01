@@ -23,7 +23,7 @@ Link::Link(const RGBA& color)
     m_sprite = new Sprite("pDown", TheGame::PLAYER_LAYER);
     m_sprite->m_scale = Vector2(1.0f, 1.0f);
     m_sprite->m_tintColor = m_color;
-    m_speed = 0.0025f;
+    m_speed = 1.0f;
     m_rateOfFire = 0.5f;
 }
 
@@ -39,7 +39,7 @@ void Link::Update(float deltaSeconds)
     ASSERT_OR_DIE(TheGame::instance->m_host, "Update for the player should not be called on the clients.");
     Entity::Update(deltaSeconds);
     m_timeSinceLastShot += deltaSeconds;
-    float adjustedSpeed = m_speed;
+    float adjustedSpeed = m_speed / 20.0f;
 
     InputMap& input = TheGame::instance->m_host->m_networkMappings[m_netOwnerIndex];
     Vector2 inputDirection = input.GetVector2("Right", "Up");
@@ -95,13 +95,13 @@ float Link::CalculateSwordRotationDegrees()
     switch (m_facing)
     {
     case WEST:
-        return 180.0f;
-    case NORTH:
         return 270.0f;
+    case NORTH:
+        return 0.0f;
     case EAST:
         return 0.0f;
     case SOUTH:
-        return 90.0f;
+        return 180.0f;
     default:
         ERROR_AND_DIE("Invalid state for facing");
     }
@@ -113,13 +113,13 @@ Vector2 Link::CalculateSwordPosition()
     switch (m_facing)
     {
     case WEST:
-        return m_sprite->GetBounds().mins;
-    case NORTH:
         return m_sprite->GetBounds().GetTopLeft();
+    case NORTH:
+        return m_sprite->GetBounds().maxs;
     case EAST:
         return m_sprite->GetBounds().maxs;
     case SOUTH:
-        return m_sprite->GetBounds().GetBottomRight();
+        return m_sprite->GetBounds().mins;
     default:
         ERROR_AND_DIE("Invalid state for facing");
     }

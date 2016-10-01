@@ -13,18 +13,17 @@ _______          __                       __   .__
 
 How to test:
   When the game starts, we automatically run nsstart to start the netsession.
-  Run nethost <username> on one, netjoin <username> <ip> on the other
-  I conformed to your standards, so things should be pretty straightforward
+  Press H to host on one, J on the other. You might be able to get multi-join to work, but there's a known issue with my port cycling that I haven't been able to fix yet.
 
+  Use WASD to move your character and Spacebar to swing your sword.
+    You're left-handed, so keep in mind where your sword will come out from.
+    Players play a little hurt sound when they get hurt ;w;
 
-  If you'd like to test inorder vs outoforder reliable traffic, I created the following two commands to toggle debugging the two:
-  testinorder
-    Sends reliable, inorder "heartbeats". You can follow along with the counter in the console and watch them go up.
-    Note that I'm sending these to the "default" local host with the default port, so whichever dude joins first (4334) currently gets them.
-  testoutorder
-    Sends reliable, out of order "heartbeats". You can follow the counter and watch them get in the wrong order.
-    Same deal as above with the port thing, since I'm just defaulting to 4334.
+  The appropriate states are in the game, and players are able to die, but it's very boring, and they don't disconnect, instead just watch.
 
 Known Issues:
   - The Console is a piece of shit as always
-  - Note that I'm currently sending packets to myself to enable you to test without a partner and for debug reasons, this obviously isn't what I should do in real life
+  - I had a windows update last night that afterwards made a bunch of problems with the player speed present themselves. I fixed them by enabling vsync again. HAVE VSYNC ON PLEASE XD
+  - Controls feel kinda garbage, as they should for this milestone
+  - Players just monitor the battlefield, there is no "win" state or anything yet.
+	- If your player doesn't spawn in when joining, it dropped the packet for joining. close window and rejoin.
