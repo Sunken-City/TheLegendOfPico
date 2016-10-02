@@ -276,7 +276,7 @@ void TheGame::InitializeMainMenuState()
 {
     titleText = new Sprite("TitleText", PLAYER_LAYER);
     titleText->m_scale = Vector2(1.0f, 1.0f);
-    OnStateSwitch.RegisterMethod(this, &TheGame::CleanupMainMenuState);
+    OnStateLeave.RegisterMethod(this, &TheGame::CleanupMainMenuState);
 }
 
 //-----------------------------------------------------------------------------------
@@ -337,7 +337,7 @@ void TheGame::InitializePlayingState()
     testBackground = new Sprite("Map", BACKGROUND_LAYER);
     testBackground->m_scale = Vector2(1.0f, 1.0f);
     SpriteGameRenderer::instance->SetWorldBounds(testBackground->GetBounds());
-    OnStateSwitch.RegisterMethod(this, &TheGame::CleanupPlayingState);
+    OnStateLeave.RegisterMethod(this, &TheGame::CleanupPlayingState);
 }
 
 //-----------------------------------------------------------------------------------
@@ -377,7 +377,7 @@ void TheGame::InitializeGameOverState()
     gameOverText = new Sprite("GameOverText", PLAYER_LAYER);
     gameOverText->m_scale = Vector2(10.0f, 10.0f);
     //TODO: SpriteGameRenderer::instance->AddEffectToLayer()
-    OnStateSwitch.RegisterMethod(this, &TheGame::CleanupGameOverState);
+    OnStateLeave.RegisterMethod(this, &TheGame::CleanupGameOverState);
 }
 
 //-----------------------------------------------------------------------------------

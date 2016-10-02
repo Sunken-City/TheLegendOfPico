@@ -17,7 +17,7 @@ GameState GetGameState();
 const char* GetStateString(GameState state);
 
 //ONE SHOT FUNCTIONS ONLY. These get registered when switching to the state, and then are fired when swapping away from that state and removed.
-extern Event<unsigned int> OnStateSwitch;
+extern Event<unsigned int> OnStateLeave;
 
 
 

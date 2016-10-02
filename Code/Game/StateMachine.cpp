@@ -2,7 +2,7 @@
 #include "Engine/Core/ErrorWarningAssert.hpp"
 
 static GameState m_state = STARTUP;
-Event<unsigned int> OnStateSwitch;
+Event<unsigned int> OnStateLeave;
 
 bool SetGameState(GameState newState)
 {
@@ -10,8 +10,8 @@ bool SetGameState(GameState newState)
     {
         DebuggerPrintf("Changed State from %s to %s\n", GetStateString(m_state), GetStateString(newState));
         m_state = newState;
-        OnStateSwitch.Trigger((unsigned int)newState);
-        OnStateSwitch.UnregisterAllSubscriptions();
+        OnStateLeave.Trigger((unsigned int)newState);
+        OnStateLeave.UnregisterAllSubscriptions();
         return true;
     }
     else
