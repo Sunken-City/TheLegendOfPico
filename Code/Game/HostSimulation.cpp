@@ -137,6 +137,7 @@ void HostSimulation::OnPlayerCreate(const NetSender&, NetMessage message)
         player->SetColor(color);
         player->m_sprite->Disable();
         m_players[player->m_netOwnerIndex] = player;
+        m_entities.push_back(player);
     }
 }
 
@@ -237,13 +238,18 @@ void HostSimulation::SendNetHostUpdate(NetConnection* cp)
             update.Write<Link::Facing>(link->m_facing);
         }
     }
-    update.Write<uint16_t>(m_entities.size());
-    for (Entity* entity : m_entities)
-    {
-        update.Write<uint16_t>(entity->m_networkId);
-        update.Write<Vector2>(entity->m_position);
-        update.Write<float>(entity->m_rotationDegrees);
-    }
+//     unsigned int* numEntities = update.Reserve<unsigned int>(m_entities.size());
+//     for (Entity* entity : m_entities)
+//     {
+//         if (entity->IsPlayer())
+//         {
+//             *numEntities = *numEntities - 1;
+//             continue;
+//         }
+//         update.Write<uint16_t>(entity->m_networkId);
+//         update.Write<Vector2>(entity->m_position);
+//         update.Write<float>(entity->m_rotationDegrees);
+//     }
     cp->SendMessage(update);
 }
 

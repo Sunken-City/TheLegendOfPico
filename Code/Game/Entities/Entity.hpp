@@ -16,7 +16,8 @@ public:
     virtual bool IsCollidingWith(Entity* otherEntity);
     virtual void ResolveCollision(Entity* otherEntity);
     virtual void TakeDamage(float m_power);
-    void ApplyClientUpdate();
+    virtual void ApplyClientUpdate();
+    inline virtual bool IsPlayer() { return false; }
     //MEMBER VARIABLES/////////////////////////////////////////////////////////////////////
     uint16_t m_networkId;
     Sprite* m_sprite;

@@ -23,6 +23,7 @@ public:
     virtual void Update(float deltaSeconds);
     virtual void Render() const;
     virtual void ResolveCollision(Entity* otherEntity);
+    inline virtual bool IsPlayer() { return true; };
 
     void UpdateSpriteFromFacing();
     float CalculateSwordRotationDegrees();
