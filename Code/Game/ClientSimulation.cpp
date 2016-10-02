@@ -68,6 +68,21 @@ void ClientSimulation::OnUpdateFromHostReceived(const NetSender& from, NetMessag
                 networkedPlayer->ApplyClientUpdate();
             }
         }
+        uint16_t numEntities = 0;
+        message.Read<uint16_t>(numEntities);
+        for (uint16_t i = 0; i < numEntities; ++i)
+        {
+            uint16_t networkId = 0;
+            message.Read<uint16_t>(networkId);
+            auto localEntity = m_entities.find(networkId);
+            if (localEntity != m_entities.end())
+            {
+                Entity* entity = localEntity->second;
+                message.Read<Vector2>(entity->m_position);
+                message.Read<float>(entity->m_rotationDegrees);
+                entity->ApplyClientUpdate();
+            }
+        }
     }
 }
 
@@ -215,5 +230,5 @@ void ClientSimulation::OnPlayerDamaged(const NetSender&, NetMessage message)
 void ClientSimulation::OnPlayerFireBow(const NetSender& from, NetMessage& message)
 {
     static const SoundID shootSound = AudioSystem::instance->CreateOrGetSound("Data\\SFX\\Oracle_Enemy_Spit.wav");
-    throw std::logic_error("The method or operation is not implemented.");
+    AudioSystem::instance->PlaySound(shootSound);
 }

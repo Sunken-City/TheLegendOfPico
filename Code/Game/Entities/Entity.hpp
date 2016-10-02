@@ -1,6 +1,7 @@
 #pragma once
 #include "Engine/Components/Transform3D.hpp"
 #include "Engine/Math/Vector2.hpp"
+#include <stdint.h>
 
 class Sprite;
 
@@ -15,11 +16,12 @@ public:
     virtual bool IsCollidingWith(Entity* otherEntity);
     virtual void ResolveCollision(Entity* otherEntity);
     virtual void TakeDamage(float m_power);
-
+    void ApplyClientUpdate();
     //MEMBER VARIABLES/////////////////////////////////////////////////////////////////////
+    uint16_t m_networkId;
     Sprite* m_sprite;
     Vector2 m_position;
-    float m_defence;
+    float m_rotationDegrees;
     float m_hp;
     float m_maxHp;
     float m_collisionRadius;

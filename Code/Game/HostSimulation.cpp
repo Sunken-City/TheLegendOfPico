@@ -137,7 +137,6 @@ void HostSimulation::OnPlayerCreate(const NetSender&, NetMessage message)
         player->SetColor(color);
         player->m_sprite->Disable();
         m_players[player->m_netOwnerIndex] = player;
-        m_entities.push_back(player);
     }
 }
 
@@ -223,7 +222,7 @@ void HostSimulation::CheckForAndBroadcastDamage(Link* attackingPlayer, const Vec
 //-----------------------------------------------------------------------------------
 void HostSimulation::OnPlayerFireBow(const NetSender& from, NetMessage& message)
 {
-    throw std::logic_error("The method or operation is not implemented.");
+
 }
 
 //-----------------------------------------------------------------------------------
@@ -237,6 +236,13 @@ void HostSimulation::SendNetHostUpdate(NetConnection* cp)
             update.Write<Vector2>(link->m_position);
             update.Write<Link::Facing>(link->m_facing);
         }
+    }
+    update.Write<uint16_t>(m_entities.size());
+    for (Entity* entity : m_entities)
+    {
+        update.Write<uint16_t>(entity->m_networkId);
+        update.Write<Vector2>(entity->m_position);
+        update.Write<float>(entity->m_rotationDegrees);
     }
     cp->SendMessage(update);
 }
