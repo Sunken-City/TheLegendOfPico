@@ -22,6 +22,8 @@ ClientSimulation::ClientSimulation()
         m_players.push_back(nullptr);
     }
     TheGame::instance->m_gameplayMapping.FindInputValue("Attack")->m_OnPress.RegisterMethod(this, &ClientSimulation::OnLocalPlayerAttackInput);
+    TheGame::instance->m_gameplayMapping.FindInputValue("FireBow")->m_OnPress.RegisterMethod(this, &ClientSimulation::OnLocalPlayerFireBowInput);
+    TheGame::instance->m_gameplayMapping.FindInputValue("Respawn")->m_OnPress.RegisterMethod(this, &ClientSimulation::OnLocalPlayerRespawnInput);
 }
 
 //-----------------------------------------------------------------------------------
@@ -84,21 +86,29 @@ void ClientSimulation::SendNetClientUpdate(NetConnection* cp)
 }
 
 //-----------------------------------------------------------------------------------
-void ClientSimulation::OnPlayerCreate(const NetSender& from, NetMessage message)
+void ClientSimulation::OnPlayerCreate(const NetSender&, NetMessage message)
 {
-    UNUSED(from);
     Link* player = new Link();
     unsigned int color = 0;
+    bool isRequest = false;
 
     //Read in link data
+    message.Read<bool>(isRequest);
     message.Read<uint8_t>(player->m_netOwnerIndex);
     message.Read<unsigned int>(color);
 
-    player->SetColor(color);
-    m_players[player->m_netOwnerIndex] = player;
-    if (player->m_netOwnerIndex == NetSession::instance->GetMyConnectionIndex())
+    if (!isRequest)
     {
-        m_localPlayer = player;
+        player->SetColor(color);
+        m_players[player->m_netOwnerIndex] = player;
+        if (player->m_netOwnerIndex == NetSession::instance->GetMyConnectionIndex())
+        {
+            m_localPlayer = player;
+        }
+    }
+    else
+    {
+        delete player;
     }
 }
 
@@ -107,6 +117,10 @@ void ClientSimulation::OnPlayerDestroy(const NetSender&, NetMessage message)
 {
     uint8_t index = NetSession::INVALID_CONNECTION_INDEX;
     message.Read<uint8_t>(index);
+    if (m_players[index] == m_localPlayer)
+    {
+        m_localPlayer = nullptr;
+    }
     delete m_players[index];
     m_players[index] = nullptr;
 }
@@ -118,6 +132,29 @@ void ClientSimulation::OnLocalPlayerAttackInput(const InputValue*)
     NetMessage attackMessage(GameNetMessages::PLAYER_ATTACK);
     attackMessage.Write<bool>(isRequest);
     NetSession::instance->m_hostConnection->SendMessage(attackMessage);
+}
+
+//-----------------------------------------------------------------------------------
+void ClientSimulation::OnLocalPlayerFireBowInput(const InputValue*)
+{
+    bool isRequest = true;
+    NetMessage attackMessage(GameNetMessages::PLAYER_FIRE_BOW);
+    attackMessage.Write<bool>(isRequest);
+    NetSession::instance->m_hostConnection->SendMessage(attackMessage);
+}
+
+//-----------------------------------------------------------------------------------
+void ClientSimulation::OnLocalPlayerRespawnInput(const InputValue* respawnInput)
+{
+    if (m_localPlayer == nullptr)
+    {
+        bool isRequest = true;
+        NetMessage requestPlayerCreate(GameNetMessages::PLAYER_CREATE);
+        requestPlayerCreate.Write<bool>(isRequest);
+        requestPlayerCreate.Write<uint8_t>(NetSession::instance->GetMyConnectionIndex());
+        requestPlayerCreate.Write<unsigned int>(0xFEEDFACE);
+        NetSession::instance->m_hostConnection->SendMessage(requestPlayerCreate);
+    }
 }
 
 //-----------------------------------------------------------------------------------
@@ -172,4 +209,11 @@ void ClientSimulation::OnPlayerDamaged(const NetSender&, NetMessage message)
     hurtPlayer = m_players[index];
 
     AudioSystem::instance->PlaySound(hurtSound);
+}
+
+//-----------------------------------------------------------------------------------
+void ClientSimulation::OnPlayerFireBow(const NetSender& from, NetMessage& message)
+{
+    static const SoundID shootSound = AudioSystem::instance->CreateOrGetSound("Data\\SFX\\Oracle_Enemy_Spit.wav");
+    throw std::logic_error("The method or operation is not implemented.");
 }

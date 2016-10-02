@@ -1,16 +1,17 @@
-#include "Game/Entities/Bullet.hpp"
+#include "Game/Entities/Arrow.hpp"
 #include "Engine/Renderer/2D/Sprite.hpp"
 #include "Game/TheGame.hpp"
 
 //-----------------------------------------------------------------------------------
-Bullet::Bullet(Entity* owner) 
+Arrow::Arrow(Entity* owner, uint16_t networkId) 
     : Entity()
+    , m_networkId(networkId)
     , m_speed(5.0f)
     , m_power(1.0f)
     , m_lifeSpan(2.0f)
     , m_owner(owner)
 {
-    m_sprite = new Sprite("Player", TheGame::PLAYER_BULLET_LAYER);
+    m_sprite = new Sprite("Arrow", TheGame::WEAPON_LAYER);
     m_sprite->m_scale = Vector2(1.0f, 1.0f);
 
     m_sprite->m_position = m_owner->m_sprite->m_position;
@@ -18,12 +19,12 @@ Bullet::Bullet(Entity* owner)
 }
 
 //-----------------------------------------------------------------------------------
-Bullet::~Bullet()
+Arrow::~Arrow()
 {
 }
 
 //-----------------------------------------------------------------------------------
-void Bullet::Update(float deltaSeconds)
+void Arrow::Update(float deltaSeconds)
 {
     Entity::Update(deltaSeconds);
     if (m_age < m_lifeSpan)
@@ -39,13 +40,13 @@ void Bullet::Update(float deltaSeconds)
 }
 
 //-----------------------------------------------------------------------------------
-void Bullet::Render() const
+void Arrow::Render() const
 {
 
 }
 
 //-----------------------------------------------------------------------------------
-void Bullet::ResolveCollision(Entity* otherEntity)
+void Arrow::ResolveCollision(Entity* otherEntity)
 {
     Entity::ResolveCollision(otherEntity);
     if (otherEntity != m_owner)

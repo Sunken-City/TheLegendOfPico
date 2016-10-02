@@ -25,6 +25,9 @@ public:
     void UninitializeKeyMappings();
     void OnUpdateFromClientReceived(const NetSender& from, NetMessage& message);
     void OnConnectionJoined(NetConnection* cp);
+
+    void BroadcastLinkCreation(uint8_t index, unsigned int playerColor);
+
     void OnConnectionLeave(NetConnection* cp);
 
     //These functions take a copy of the NetMessage intentionally, so that they can read the contents on their own
@@ -32,6 +35,7 @@ public:
     void OnPlayerCreate(const NetSender& from, NetMessage message);
     void OnPlayerAttack(const NetSender& from, NetMessage message);
     void CheckForAndBroadcastDamage(Link* attackingPlayer, const Vector2& swordPosition);
+    void OnPlayerFireBow(const NetSender& from, NetMessage& message);
 
     //MEMBER VARIABLES/////////////////////////////////////////////////////////////////////
     std::vector<Link*> m_players;

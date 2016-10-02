@@ -17,9 +17,7 @@
 #include "Engine/Input/XMLUtils.hpp"
 #include "Game/Entities/Entity.hpp"
 #include "Game/Entities/Link.hpp"
-#include "Game/Entities/Bullet.hpp"
-#include "Entities/ItemBox.hpp"
-#include "Entities/Pickup.hpp"
+#include "Game/Entities/Arrow.hpp"
 #include "Engine/Net/RemoteCommandService.hpp"
 #include "Engine/Net/UDPIP/NetConnection.hpp"
 #include "Engine/Net/UDPIP/NetSession.hpp"
@@ -96,6 +94,19 @@ void OnPlayerAttack(const NetSender& from, NetMessage& message)
 }
 
 //-----------------------------------------------------------------------------------
+void OnPlayerFireBow(const NetSender& from, NetMessage& message)
+{
+    if (TheGame::instance->m_host)
+    {
+        TheGame::instance->m_host->OnPlayerFireBow(from, message);
+    }
+    if (TheGame::instance->m_client)
+    {
+        TheGame::instance->m_client->OnPlayerFireBow(from, message);
+    }
+}
+
+//-----------------------------------------------------------------------------------
 void OnPlayerDamaged(const NetSender& from, NetMessage& message)
 {
     if (TheGame::instance->m_client)
@@ -131,6 +142,7 @@ TheGame::TheGame()
     NetSession::instance->RegisterMessage((uint8_t)PLAYER_CREATE, "Player Create", &OnPlayerCreate, (uint32_t)NetMessage::Option::RELIABLE | (uint32_t)NetMessage::Option::INORDER, (uint32_t)NetMessage::Control::NONE);
     NetSession::instance->RegisterMessage((uint8_t)PLAYER_DESTROY, "Player Destroy", &OnPlayerDestroy, (uint32_t)NetMessage::Option::RELIABLE | (uint32_t)NetMessage::Option::INORDER, (uint32_t)NetMessage::Control::NONE);
     NetSession::instance->RegisterMessage((uint8_t)PLAYER_ATTACK, "Player Attack", &OnPlayerAttack, (uint32_t)NetMessage::Option::RELIABLE, (uint32_t)NetMessage::Control::NONE);
+    NetSession::instance->RegisterMessage((uint8_t)PLAYER_FIRE_BOW, "Player Fire Bow", &OnPlayerFireBow, (uint32_t)NetMessage::Option::RELIABLE, (uint32_t)NetMessage::Control::NONE);
     NetSession::instance->RegisterMessage((uint8_t)PLAYER_DAMAGED, "Player Damaged", &OnPlayerDamaged, (uint32_t)NetMessage::Option::RELIABLE, (uint32_t)NetMessage::Control::NONE);
     NetSession::instance->m_OnConnectionJoin.RegisterMethod(this, &TheGame::OnConnectionJoined);
     NetSession::instance->m_OnConnectionLeave.RegisterMethod(this, &TheGame::OnConnectionLeave);
@@ -290,6 +302,7 @@ void TheGame::UpdateMainMenu(float deltaSeconds)
 
         //Force creation of the host's player and potentially local client player.
         NetMessage message(GameNetMessages::PLAYER_CREATE);
+        message.Write<bool>(false);
         message.Write<uint8_t>(NetSession::instance->m_hostConnection->m_index);
         message.Write<unsigned int>(RGBA::GetRandom().ToUnsignedInt());
         NetSession::instance->m_hostConnection->SendMessage(message);
@@ -312,17 +325,6 @@ void TheGame::RenderMainMenu() const
 {
     SpriteGameRenderer::instance->SetClearColor(RGBA::CERULEAN);
     SpriteGameRenderer::instance->Render();
-}
-
-//-----------------------------------------------------------------------------------
-void TheGame::InitializeKeyMappings()
-{
-    KeyboardInputDevice* keyboard = InputSystem::instance->m_keyboardDevice;
-    m_gameplayMapping.AddInputAxis("Up", keyboard->FindValue('W'), keyboard->FindValue('S'));
-    m_gameplayMapping.AddInputAxis("Right", keyboard->FindValue('D'), keyboard->FindValue('A'));
-    m_gameplayMapping.AddInputValue("Attack", keyboard->FindValue(' '));
-    m_gameplayMapping.AddInputValue("Host", keyboard->FindValue('H'));
-    m_gameplayMapping.AddInputValue("Join", keyboard->FindValue('J'));
 }
 
 //-----------------------------------------------------------------------------------
@@ -398,6 +400,19 @@ void TheGame::RenderGameOver() const
 }
 
 //-----------------------------------------------------------------------------------
+void TheGame::InitializeKeyMappings()
+{
+    KeyboardInputDevice* keyboard = InputSystem::instance->m_keyboardDevice;
+    m_gameplayMapping.AddInputAxis("Up", keyboard->FindValue('W'), keyboard->FindValue('S'));
+    m_gameplayMapping.AddInputAxis("Right", keyboard->FindValue('D'), keyboard->FindValue('A'));
+    m_gameplayMapping.AddInputValue("Attack", keyboard->FindValue(' '));
+    m_gameplayMapping.AddInputValue("FireBow", keyboard->FindValue('B'));
+    m_gameplayMapping.AddInputValue("Respawn", keyboard->FindValue('R'));
+    m_gameplayMapping.AddInputValue("Host", keyboard->FindValue('H'));
+    m_gameplayMapping.AddInputValue("Join", keyboard->FindValue('J'));
+}
+
+//-----------------------------------------------------------------------------------
 void TheGame::RegisterSprites()
 {
     ResourceDatabase::instance->RegisterSprite("Map", "Data\\Images\\SymmetryCityMap.png");
@@ -406,6 +421,7 @@ void TheGame::RegisterSprites()
     ResourceDatabase::instance->RegisterSprite("pRight", "Data\\Images\\standingRight.png");
     ResourceDatabase::instance->RegisterSprite("pLeft", "Data\\Images\\standingLeft.png");
     ResourceDatabase::instance->RegisterSprite("swordSwing", "Data\\Images\\swordSwing.png");
+    ResourceDatabase::instance->RegisterSprite("Arrow", "Data\\Images\\arrow.png");
 
     ResourceDatabase::instance->RegisterSprite("TitleText", "Data\\Images\\Title.png");
     ResourceDatabase::instance->RegisterSprite("GameOverText", "Data\\Images\\GameOver.png");

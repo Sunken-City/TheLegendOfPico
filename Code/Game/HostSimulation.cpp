@@ -48,18 +48,10 @@ void HostSimulation::OnUpdateFromClientReceived(const NetSender& from, NetMessag
 //-----------------------------------------------------------------------------------
 void HostSimulation::OnConnectionJoined(NetConnection* cp)
 {
+    uint8_t index = cp->m_index;
+    bool isRequest = false;
     RGBA newLinkColor = RGBA::GetRandom();
-    //Let everyone know about the guy we just created (Including ourselves!).
-    for (NetConnection* conn : NetSession::instance->m_allConnections)
-    {
-        if (conn)
-        {
-            NetMessage message(GameNetMessages::PLAYER_CREATE);
-            message.Write<uint8_t>(cp->m_index);
-            message.Write<unsigned int>(newLinkColor.ToUnsignedInt());
-            conn->SendMessage(message);
-        }
-    }
+    BroadcastLinkCreation(index, newLinkColor.ToUnsignedInt());
 
     //Bring the client up to speed.
     for (Link* link : m_players)
@@ -67,9 +59,29 @@ void HostSimulation::OnConnectionJoined(NetConnection* cp)
         if (link)
         {
             NetMessage message(GameNetMessages::PLAYER_CREATE);
+            message.Write<bool>(isRequest);
             message.Write<uint8_t>(link->m_netOwnerIndex);
             message.Write<unsigned int>(link->m_color.ToUnsignedInt());
             cp->SendMessage(message);
+        }
+    }
+}
+
+//-----------------------------------------------------------------------------------
+void HostSimulation::BroadcastLinkCreation(uint8_t index, unsigned int playerColor)
+{
+    bool isRequest = false;
+
+    //Let everyone know about the guy we just created (Including ourselves!).
+    for (NetConnection* conn : NetSession::instance->m_allConnections)
+    {
+        if (conn)
+        {
+            NetMessage message(GameNetMessages::PLAYER_CREATE);
+            message.Write<bool>(isRequest);
+            message.Write<uint8_t>(index);
+            message.Write<unsigned int>(playerColor);
+            conn->SendMessage(message);
         }
     }
 }
@@ -108,15 +120,25 @@ void HostSimulation::OnPlayerCreate(const NetSender&, NetMessage message)
 {
     Link* player = new Link();
     unsigned int color = 0;
+    bool isRequest = false;
 
     //Read the link data
+    message.Read<bool>(isRequest);
     message.Read<uint8_t>(player->m_netOwnerIndex);
     message.Read<unsigned int>(color);
 
-    player->SetColor(color);
-    player->m_sprite->Disable();
-    m_players[player->m_netOwnerIndex] = player;
-    m_entities.push_back(player);
+    if (isRequest)
+    {
+        BroadcastLinkCreation(player->m_netOwnerIndex, color);
+        delete player;
+    }
+    else
+    {
+        player->SetColor(color);
+        player->m_sprite->Disable();
+        m_players[player->m_netOwnerIndex] = player;
+        m_entities.push_back(player);
+    }
 }
 
 //-----------------------------------------------------------------------------------
@@ -196,6 +218,12 @@ void HostSimulation::CheckForAndBroadcastDamage(Link* attackingPlayer, const Vec
 
         }
     }
+}
+
+//-----------------------------------------------------------------------------------
+void HostSimulation::OnPlayerFireBow(const NetSender& from, NetMessage& message)
+{
+    throw std::logic_error("The method or operation is not implemented.");
 }
 
 //-----------------------------------------------------------------------------------

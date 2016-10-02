@@ -35,6 +35,9 @@
     <ClCompile Include="ClientSimulation.cpp">
       <Filter>General</Filter>
     </ClCompile>
+    <ClCompile Include="Entities\Arrow.cpp">
+      <Filter>General\Entities</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GameCommon.hpp">
@@ -57,6 +60,9 @@
     </ClInclude>
     <ClInclude Include="ClientSimulation.hpp">
       <Filter>General</Filter>
+    </ClInclude>
+    <ClInclude Include="Entities\Arrow.hpp">
+      <Filter>General\Entities</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

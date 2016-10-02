@@ -1,11 +1,12 @@
 #pragma once
 #include "Game/Entities/Entity.hpp"
+#include <stdint.h>
 
-class Bullet : public Entity
+class Arrow : public Entity
 {
 public:
-    Bullet(Entity* Owner);
-    virtual ~Bullet();
+    Arrow(Entity* Owner, uint16_t networkId);
+    virtual ~Arrow();
 
     virtual void Update(float deltaSeconds);
     virtual void Render() const;
@@ -15,5 +16,6 @@ public:
     float m_speed;
     float m_power;
     float m_lifeSpan;
+    uint16_t m_networkId;
     Entity* m_owner;
 };

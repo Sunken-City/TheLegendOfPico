@@ -22,8 +22,11 @@ public:
     void OnPlayerCreate(const NetSender& from, NetMessage message);
     void OnPlayerDestroy(const NetSender& from, NetMessage message);
     void OnLocalPlayerAttackInput(const InputValue* attackInput);
+    void OnLocalPlayerFireBowInput(const InputValue* bowInput);
+    void OnLocalPlayerRespawnInput(const InputValue* respawnInput);
     void OnPlayerAttack(const NetSender& from, NetMessage message);
     void OnPlayerDamaged(const NetSender& from, NetMessage message);
+    void OnPlayerFireBow(const NetSender& from, NetMessage& message);
 
     //MEMBER VARIABLES/////////////////////////////////////////////////////////////////////
     Link* m_localPlayer;

@@ -148,6 +148,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ClientSimulation.cpp" />
+    <ClCompile Include="Entities\Arrow.cpp" />
     <ClCompile Include="Entities\Entity.cpp" />
     <ClCompile Include="Entities\Link.cpp" />
     <ClCompile Include="GameCommon.cpp" />
@@ -158,6 +159,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ClientSimulation.hpp" />
+    <ClInclude Include="Entities\Arrow.hpp" />
     <ClInclude Include="Entities\Entity.hpp" />
     <ClInclude Include="Entities\Link.hpp" />
     <ClInclude Include="GameCommon.hpp" />
