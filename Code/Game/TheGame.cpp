@@ -290,7 +290,7 @@ void TheGame::UpdateMainMenu(float deltaSeconds)
 {
     UNUSED(deltaSeconds);
 
-    if (m_gameplayMapping.IsDown("Host"))
+    if (m_gameplayMapping.WasJustPressed("Host"))
     {
         m_host = new HostSimulation();
         m_client = new ClientSimulation();
@@ -310,7 +310,7 @@ void TheGame::UpdateMainMenu(float deltaSeconds)
         SetGameState(PLAYING);
         InitializePlayingState();
     }
-    if (m_gameplayMapping.IsDown("Join"))
+    if (m_gameplayMapping.WasJustPressed("Join"))
     {
         m_client = new ClientSimulation();
         Console::instance->RunCommand(Stringf("netjoin client%i %s", rand(), NetSystem::SockAddrToString(NetSystem::GetLocalHostAddressUDP("4334"))));
