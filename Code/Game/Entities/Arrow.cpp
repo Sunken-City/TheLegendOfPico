@@ -5,12 +5,12 @@
 //-----------------------------------------------------------------------------------
 Arrow::Arrow(Entity* owner, uint16_t networkId) 
     : Entity()
-    , m_networkId(networkId)
     , m_speed(5.0f)
     , m_power(1.0f)
     , m_lifeSpan(2.0f)
     , m_owner(owner)
 {
+    m_networkId = networkId;
     m_sprite = new Sprite("Arrow", TheGame::WEAPON_LAYER);
     m_sprite->m_scale = Vector2(1.0f, 1.0f);
 

@@ -23,14 +23,12 @@ public:
     void CleanUpDeadEntities();
     void InitializeKeyMappings();
     void UninitializeKeyMappings();
-    void OnUpdateFromClientReceived(const NetSender& from, NetMessage& message);
     void OnConnectionJoined(NetConnection* cp);
-
+    void OnConnectionLeave(NetConnection* cp);
     void BroadcastLinkCreation(uint8_t index, unsigned int playerColor);
 
-    void OnConnectionLeave(NetConnection* cp);
-
     //These functions take a copy of the NetMessage intentionally, so that they can read the contents on their own
+    void OnUpdateFromClientReceived(const NetSender& from, NetMessage& message);
     void OnPlayerDestroy(const NetSender& from, NetMessage message);
     void OnPlayerCreate(const NetSender& from, NetMessage message);
     void OnPlayerAttack(const NetSender& from, NetMessage message);

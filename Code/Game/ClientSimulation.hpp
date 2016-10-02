@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include <map>
 
 class Link;
 class NetMessage;
@@ -31,4 +32,5 @@ public:
     //MEMBER VARIABLES/////////////////////////////////////////////////////////////////////
     Link* m_localPlayer;
     std::vector<Link*> m_players;
+    std::map<uint16_t, Entity*> m_entities;
 };

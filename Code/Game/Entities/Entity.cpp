@@ -4,13 +4,14 @@
 //-----------------------------------------------------------------------------------
 Entity::Entity()
     : m_sprite(nullptr)
-    , m_defence(0.0f)
     , m_hp(1.0f)
+    , m_rotationDegrees(0.0f)
     , m_maxHp(1.0f)
     , m_collisionRadius(1.0f)
     , m_age(0.0f)
     , m_isDead(false)
     , m_position(0.0f)
+    , m_networkId(0)
 {
 
 }
@@ -62,6 +63,16 @@ void Entity::TakeDamage(float damage)
     if (m_hp < 0.0f)
     {
         m_isDead = true;
+    }
+}
+
+//-----------------------------------------------------------------------------------
+void Entity::ApplyClientUpdate()
+{
+    if (m_sprite)
+    {
+        m_sprite->m_position = m_position;
+        m_sprite->m_rotationDegrees = m_rotationDegrees;
     }
 }
 

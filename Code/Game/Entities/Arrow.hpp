@@ -16,6 +16,5 @@ public:
     float m_speed;
     float m_power;
     float m_lifeSpan;
-    uint16_t m_networkId;
     Entity* m_owner;
 };
