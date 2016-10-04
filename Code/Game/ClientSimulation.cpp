@@ -68,21 +68,21 @@ void ClientSimulation::OnUpdateFromHostReceived(const NetSender& from, NetMessag
                 networkedPlayer->ApplyClientUpdate();
             }
         }
-        unsigned int numEntities = 0;
-        message.Read<unsigned int>(numEntities);
-        for (unsigned int i = 0; i < numEntities; ++i)
-        {
-            uint16_t networkId = 0;
-            message.Read<uint16_t>(networkId);
-            auto localEntity = m_entities.find(networkId);
-            if (localEntity != m_entities.end())
-            {
-                Entity* entity = localEntity->second;
-                message.Read<Vector2>(entity->m_position);
-                message.Read<float>(entity->m_rotationDegrees);
-                entity->ApplyClientUpdate();
-            }
-        }
+//         unsigned int numEntities = 0;
+//         message.Read<unsigned int>(numEntities);
+//         for (unsigned int i = 0; i < numEntities; ++i)
+//         {
+//             uint16_t networkId = 0;
+//             message.Read<uint16_t>(networkId);
+//             auto localEntity = m_entities.find(networkId);
+//             if (localEntity != m_entities.end())
+//             {
+//                 Entity* entity = localEntity->second;
+//                 message.Read<Vector2>(entity->m_position);
+//                 message.Read<float>(entity->m_rotationDegrees);
+//                 entity->ApplyClientUpdate();
+//             }
+//         }
     }
 }
 

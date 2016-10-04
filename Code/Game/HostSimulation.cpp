@@ -243,21 +243,21 @@ void HostSimulation::SendNetHostUpdate(NetConnection* cp)
     }
     if (hasPlayer)
     {
-        unsigned int* numEntities = update.Reserve<unsigned int>(m_entities.size());
-        for (Entity* entity : m_entities)
-        {
-            if (entity->IsPlayer())
-            {
-                ByteSwap<unsigned int>(numEntities, sizeof(unsigned int));
-                *numEntities -= 1;
-                ByteSwap<unsigned int>(numEntities, sizeof(unsigned int));
-                continue;
-            }
-            update.Write<uint16_t>(entity->m_networkId);
-            update.Write<Vector2>(entity->m_position);
-            update.Write<float>(entity->m_rotationDegrees);
-        }
-        cp->SendMessage(update);
+//         unsigned int* numEntities = update.Reserve<unsigned int>(m_entities.size());
+//         for (Entity* entity : m_entities)
+//         {
+//             if (entity->IsPlayer())
+//             {
+//                 ByteSwap<unsigned int>(numEntities, sizeof(unsigned int));
+//                 *numEntities -= 1;
+//                 ByteSwap<unsigned int>(numEntities, sizeof(unsigned int));
+//                 continue;
+//             }
+//             update.Write<uint16_t>(entity->m_networkId);
+//             update.Write<Vector2>(entity->m_position);
+//             update.Write<float>(entity->m_rotationDegrees);
+//         }
+         cp->SendMessage(update);
     }
 }
 
