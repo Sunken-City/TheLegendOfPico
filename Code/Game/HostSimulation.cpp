@@ -10,6 +10,7 @@
 #include "TheGame.hpp"
 #include "Engine/Net/UDPIP/NetSession.hpp"
 #include "Engine/Renderer/2D/ResourceDatabase.hpp"
+#include "Engine/Input/InputOutputUtils.hpp"
 
 //-----------------------------------------------------------------------------------
 HostSimulation::HostSimulation()
@@ -230,27 +231,34 @@ void HostSimulation::OnPlayerFireBow(const NetSender& from, NetMessage& message)
 void HostSimulation::SendNetHostUpdate(NetConnection* cp)
 {
     NetMessage update(GameNetMessages::HOST_TO_CLIENT_UPDATE);
+    bool hasPlayer = false;
     for (Link* link : m_players)
     {
         if (link)
         {
             update.Write<Vector2>(link->m_position);
             update.Write<Link::Facing>(link->m_facing);
+            hasPlayer = true;
         }
     }
-//     unsigned int* numEntities = update.Reserve<unsigned int>(m_entities.size());
-//     for (Entity* entity : m_entities)
-//     {
-//         if (entity->IsPlayer())
-//         {
-//             *numEntities = *numEntities - 1;
-//             continue;
-//         }
-//         update.Write<uint16_t>(entity->m_networkId);
-//         update.Write<Vector2>(entity->m_position);
-//         update.Write<float>(entity->m_rotationDegrees);
-//     }
-    cp->SendMessage(update);
+    if (hasPlayer)
+    {
+        unsigned int* numEntities = update.Reserve<unsigned int>(m_entities.size());
+        for (Entity* entity : m_entities)
+        {
+            if (entity->IsPlayer())
+            {
+                ByteSwap<unsigned int>(numEntities, sizeof(unsigned int));
+                *numEntities -= 1;
+                ByteSwap<unsigned int>(numEntities, sizeof(unsigned int));
+                continue;
+            }
+            update.Write<uint16_t>(entity->m_networkId);
+            update.Write<Vector2>(entity->m_position);
+            update.Write<float>(entity->m_rotationDegrees);
+        }
+        cp->SendMessage(update);
+    }
 }
 
 //-----------------------------------------------------------------------------------
