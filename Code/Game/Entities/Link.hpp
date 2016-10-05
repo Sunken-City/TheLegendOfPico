@@ -21,6 +21,9 @@ public:
 
     //FUNCTIONS/////////////////////////////////////////////////////////////////////
     virtual void Update(float deltaSeconds);
+
+    void AttemptMove(const Vector2& attemptedPosition);
+
     virtual void Render() const;
     virtual void ResolveCollision(Entity* otherEntity);
     inline virtual bool IsPlayer() { return true; };
