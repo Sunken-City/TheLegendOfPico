@@ -11,6 +11,7 @@
 #include "Engine/Net/UDPIP/NetSession.hpp"
 #include "Engine/Renderer/2D/ResourceDatabase.hpp"
 #include "Engine/Input/InputOutputUtils.hpp"
+#include "Engine/Time/Time.hpp"
 
 //-----------------------------------------------------------------------------------
 HostSimulation::HostSimulation()
@@ -51,8 +52,8 @@ void HostSimulation::OnConnectionJoined(NetConnection* cp)
 {
     uint8_t index = cp->m_index;
     bool isRequest = false;
-    RGBA newLinkColor = RGBA::GetRandom();
-    BroadcastLinkCreation(index, newLinkColor.ToUnsignedInt());
+    m_playerColors[index] = RGBA::GetRandom().ToUnsignedInt();
+    BroadcastLinkCreation(index, m_playerColors[index]);
 
     //Bring the client up to speed.
     for (Link* link : m_players)
@@ -156,6 +157,7 @@ void HostSimulation::OnPlayerAttack(const NetSender& from, NetMessage message)
     }
     Vector2 swordPosition = attackingPlayer->CalculateSwordPosition();
     float swordRotation = attackingPlayer->CalculateSwordRotationDegrees();
+    attackingPlayer->m_timeOfLastAttack = GetCurrentTimeSeconds();
 
     if (wasSentARequest)
     {

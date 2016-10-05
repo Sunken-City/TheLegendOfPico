@@ -31,6 +31,7 @@ public:
 
     //MEMBER VARIABLES/////////////////////////////////////////////////////////////////////
     Link* m_localPlayer;
+    unsigned int m_localPlayerColor;
     std::vector<Link*> m_players;
     std::map<uint16_t, Entity*> m_entities;
 };

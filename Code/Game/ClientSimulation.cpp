@@ -47,10 +47,10 @@ void ClientSimulation::Update(float deltaSeconds)
     }
     else
     {
-#pragma todo("This is a workaround for an issue where the client gets a reliable inorder message before they've recieved their accept message. #helpC4")
         if (NetSession::instance->GetMyConnectionIndex() != NetSession::INVALID_CONNECTION_INDEX && m_players[NetSession::instance->GetMyConnectionIndex()] != nullptr)
         {
             m_localPlayer = m_players[NetSession::instance->GetMyConnectionIndex()];
+            m_localPlayerColor = m_localPlayer->m_color.ToUnsignedInt();
         }
     }
 }
@@ -121,6 +121,7 @@ void ClientSimulation::OnPlayerCreate(const NetSender&, NetMessage message)
         if (player->m_netOwnerIndex == NetSession::instance->GetMyConnectionIndex())
         {
             m_localPlayer = player;
+            m_localPlayerColor = color;
         }
         AudioSystem::instance->PlaySound(spawnSound);
     }
@@ -148,7 +149,7 @@ void ClientSimulation::OnPlayerDestroy(const NetSender&, NetMessage message)
 //-----------------------------------------------------------------------------------
 void ClientSimulation::OnLocalPlayerAttackInput(const InputValue*)
 {
-    if (m_localPlayer)
+    if (m_localPlayer && m_localPlayer->CanMove())
     {
         bool isRequest = true;
         NetMessage attackMessage(GameNetMessages::PLAYER_ATTACK);
@@ -178,7 +179,7 @@ void ClientSimulation::OnLocalPlayerRespawnInput(const InputValue* respawnInput)
         NetMessage requestPlayerCreate(GameNetMessages::PLAYER_CREATE);
         requestPlayerCreate.Write<bool>(isRequest);
         requestPlayerCreate.Write<uint8_t>(NetSession::instance->GetMyConnectionIndex());
-        requestPlayerCreate.Write<unsigned int>(0xFEEDFACE);
+        requestPlayerCreate.Write<unsigned int>(m_localPlayerColor);
         NetSession::instance->m_hostConnection->SendMessage(requestPlayerCreate);
     }
 }
@@ -238,7 +239,7 @@ void ClientSimulation::OnPlayerDamaged(const NetSender&, NetMessage message)
     hurtPlayer = m_players[index];
     if (hurtPlayer)
     {
-        hurtPlayer->m_timeSinceLastHurt = GetCurrentTimeSeconds();
+        hurtPlayer->m_timeOfLastHurt = GetCurrentTimeSeconds();
     }
 
     AudioSystem::instance->PlaySound(hurtSound);

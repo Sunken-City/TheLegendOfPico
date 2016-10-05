@@ -14,9 +14,9 @@ Link::Link(const RGBA& color)
     , m_netOwnerIndex(0)
     , m_facing(Facing::SOUTH)
     , m_rateOfFire(0.0f)
-    , m_timeSinceLastHurt(0.0f)
+    , m_timeOfLastHurt(0.0f)
+    , m_timeOfLastAttack(0.0f)
     , m_color(color)
-    , m_lastHurtTime(0.0f)
 {
     m_collisionRadius = 0.3f;
     m_isDead = false;
@@ -38,22 +38,25 @@ Link::~Link()
 //-----------------------------------------------------------------------------------
 void Link::Update(float deltaSeconds)
 {
+    const float SPEED_DIVISOR = 20.0f;
     ASSERT_OR_DIE(TheGame::instance->m_host, "Update for the player should not be called on the clients.");
     Entity::Update(deltaSeconds);
-    m_timeSinceLastHurt += deltaSeconds;
-    float adjustedSpeed = m_speed / 20.0f;
-
+    m_timeOfLastHurt += deltaSeconds;
+    float adjustedSpeed = m_speed / SPEED_DIVISOR;
     InputMap& input = TheGame::instance->m_host->m_networkMappings[m_netOwnerIndex];
+    
     Vector2 inputDirection = input.GetVector2("Right", "Up");
-    Vector2 attemptedPosition = m_position + inputDirection * adjustedSpeed;
-
-    //TODO: Bounds check
-    m_position = attemptedPosition;
-    if (m_sprite)
+    if (CanMove())
     {
-        m_sprite->m_position = attemptedPosition;
-    }
+        Vector2 attemptedPosition = m_position + inputDirection * adjustedSpeed;
 
+        //TODO: Bounds check
+        m_position = attemptedPosition;
+        if (m_sprite)
+        {
+            m_sprite->m_position = attemptedPosition;
+        }
+    }
     m_facing = GetFacingFromInput(inputDirection);
 }
 
@@ -180,7 +183,7 @@ void Link::ApplyDamageEffect()
     const float flashSpeed = 60.0f;
     double currentTime = GetCurrentTimeSeconds();
     
-    if (m_timeSinceLastHurt > (currentTime - HURT_FLASH_DURATION_SECONDS))
+    if (m_timeOfLastHurt > (currentTime - HURT_FLASH_DURATION_SECONDS))
     {
         double colorVariation = sin(currentTime * flashSpeed);
         if (colorVariation < 0.0)
@@ -196,5 +199,11 @@ void Link::ApplyDamageEffect()
     {
         m_sprite->m_tintColor = m_color;
     }
+}
+
+//-----------------------------------------------------------------------------------
+bool Link::CanMove()
+{
+    return !(m_timeOfLastAttack > (GetCurrentTimeSeconds() - SWORD_STUN_DURATION_SECONDS));
 }
 

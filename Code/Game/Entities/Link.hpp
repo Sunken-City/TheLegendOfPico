@@ -32,16 +32,18 @@ public:
     void SetColor(unsigned int color);
     void ApplyClientUpdate();
     void ApplyDamageEffect();
+    bool CanMove();
 
     //CONSTANTS/////////////////////////////////////////////////////////////////////
     const float HURT_FLASH_DURATION_SECONDS = 0.5f;
+    const float SWORD_STUN_DURATION_SECONDS = 0.1f;
 
     //MEMBER VARIABLES/////////////////////////////////////////////////////////////////////
     uint8_t m_netOwnerIndex;
     Facing m_facing;
     float m_speed;
     float m_rateOfFire;
-    float m_timeSinceLastHurt;
     RGBA m_color;
-    double m_lastHurtTime;
+    double m_timeOfLastHurt;
+    double m_timeOfLastAttack;
 };
