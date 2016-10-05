@@ -22,6 +22,7 @@ HostSimulation::HostSimulation()
     {
         m_players.push_back(nullptr);
     }
+    InitializeLevelGeometry();
 }
 
 //-----------------------------------------------------------------------------------
@@ -335,4 +336,17 @@ void HostSimulation::UninitializeKeyMappings()
         delete tempAxis->m_positiveValue;
         delete tempAxis->m_negativeValue;
     }
+}
+
+//-----------------------------------------------------------------------------------
+void HostSimulation::InitializeLevelGeometry()
+{
+    const float UNITS_PER_PIXEL = 1.0f / 16.0f;
+    const Vector2 UNITS_OFFSET = Vector2(15.0f, 8.0f);
+
+    //OuterBox
+    m_levelGeometry.emplace_back(Vector2::ZERO - UNITS_OFFSET, Vector2(480.0f, 16.0f) * UNITS_PER_PIXEL - UNITS_OFFSET);
+    m_levelGeometry.emplace_back(Vector2::ZERO - UNITS_OFFSET, Vector2(16.0f, 256.0f) * UNITS_PER_PIXEL - UNITS_OFFSET);
+    m_levelGeometry.emplace_back(Vector2(480.0f - 16.0f, 0.0f) * UNITS_PER_PIXEL - UNITS_OFFSET, Vector2(480.0f, 256.0f) * UNITS_PER_PIXEL - UNITS_OFFSET);
+    m_levelGeometry.emplace_back(Vector2(0.0f, 256.0f - 16.0f) * UNITS_PER_PIXEL - UNITS_OFFSET, Vector2(480.0f, 256.0f) * UNITS_PER_PIXEL - UNITS_OFFSET);
 }

@@ -7,6 +7,7 @@
 #include "Engine/Renderer/2D/ResourceDatabase.hpp"
 #include "Game/HostSimulation.hpp"
 #include "Engine/Time/Time.hpp"
+#include "Engine/Renderer/AABB2.hpp"
 
 //-----------------------------------------------------------------------------------
 Link::Link(const RGBA& color) 
@@ -40,6 +41,7 @@ void Link::Update(float deltaSeconds)
 {
     const float SPEED_DIVISOR = 20.0f;
     ASSERT_OR_DIE(TheGame::instance->m_host, "Update for the player should not be called on the clients.");
+
     Entity::Update(deltaSeconds);
     m_timeOfLastHurt += deltaSeconds;
     float adjustedSpeed = m_speed / SPEED_DIVISOR;
@@ -49,15 +51,27 @@ void Link::Update(float deltaSeconds)
     if (CanMove())
     {
         Vector2 attemptedPosition = m_position + inputDirection * adjustedSpeed;
+        AttemptMove(attemptedPosition);
 
-        //TODO: Bounds check
-        m_position = attemptedPosition;
-        if (m_sprite)
-        {
-            m_sprite->m_position = attemptedPosition;
-        }
     }
     m_facing = GetFacingFromInput(inputDirection);
+}
+
+//-----------------------------------------------------------------------------------
+void Link::AttemptMove(const Vector2& attemptedPosition)
+{
+    for (AABB2& geometry : TheGame::instance->m_host->m_levelGeometry)
+    {
+        if (geometry.IsIntersecting(m_position, m_collisionRadius))
+        {
+            return;
+        }
+    }
+    m_position = attemptedPosition;
+    if (m_sprite)
+    {
+        m_sprite->m_position = attemptedPosition;
+    }
 }
 
 //-----------------------------------------------------------------------------------

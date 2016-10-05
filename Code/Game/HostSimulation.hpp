@@ -2,6 +2,7 @@
 #include <vector>
 #include "Engine\Input\InputMap.hpp"
 #include "Engine\Net\UDPIP\NetSession.hpp"
+#include "Engine\Renderer\AABB2.hpp"
 
 class Entity;
 class Link;
@@ -35,6 +36,7 @@ public:
     void OnPlayerAttack(const NetSender& from, NetMessage message);
     void CheckForAndBroadcastDamage(Link* attackingPlayer, const Vector2& swordPosition);
     void OnPlayerFireBow(const NetSender& from, NetMessage& message);
+    void InitializeLevelGeometry();
 
     //CONSTANTS/////////////////////////////////////////////////////////////////////
     const static int MAX_PLAYERS = NetSession::MAX_CONNECTIONS;
@@ -42,6 +44,7 @@ public:
     //MEMBER VARIABLES/////////////////////////////////////////////////////////////////////
     std::vector<Link*> m_players;
     unsigned int m_playerColors[MAX_PLAYERS];
+    std::vector<AABB2> m_levelGeometry;
     std::vector<Entity*> m_entities;
     std::vector<Entity*> m_newEntities;
     std::vector<InputMap> m_networkMappings;
