@@ -120,11 +120,17 @@ TheGame::TheGame()
     : m_debuggingControllerIndex(0)
     , m_host(nullptr)
     , m_client(nullptr)
+    , m_playerDeathEffect(nullptr)
 {
     //Get a random timestamp seed.
     LARGE_INTEGER currentCount;
     QueryPerformanceCounter(&currentCount);
     srand((unsigned int)currentCount.QuadPart);
+
+    m_playerDeathEffect = new Material(
+            new ShaderProgram("Data\\Shaders\\fixedVertexFormat.vert", "Data\\Shaders\\Post\\deathEffect.frag"),
+            RenderState(RenderState::DepthTestingMode::OFF, RenderState::FaceCullingMode::RENDER_BACK_FACES, RenderState::BlendMode::ALPHA_BLEND)
+        );
 
     //Initialize resources and keybindings.
     ResourceDatabase::instance = new ResourceDatabase();
@@ -154,8 +160,11 @@ TheGame::TheGame()
 TheGame::~TheGame()
 {
     SetGameState(GameState::SHUTDOWN);
+
     delete ResourceDatabase::instance;
     ResourceDatabase::instance = nullptr;
+    delete m_playerDeathEffect->m_shaderProgram;
+    delete m_playerDeathEffect;
 
     if (m_host)
     {

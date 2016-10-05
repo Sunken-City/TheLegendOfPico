@@ -3,6 +3,7 @@
 #include "Engine/Math/Vector2.hpp"
 #include "Engine/Net/UDPIP/NetMessage.hpp"
 #include "Engine/Input/InputMap.hpp"
+#include "Engine/Renderer/Material.hpp"
 
 class Entity;
 class Link;
@@ -56,6 +57,7 @@ public:
     InputMap m_gameplayMapping;
     HostSimulation* m_host;
     ClientSimulation* m_client;
+    Material* m_playerDeathEffect;
 
 private:
     TheGame& operator= (const TheGame& other) = delete;

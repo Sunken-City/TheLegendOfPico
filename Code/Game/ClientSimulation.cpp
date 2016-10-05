@@ -122,6 +122,7 @@ void ClientSimulation::OnPlayerCreate(const NetSender&, NetMessage message)
         {
             m_localPlayer = player;
             m_localPlayerColor = color;
+            SpriteGameRenderer::instance->RemoveEffectFromLayer(TheGame::instance->m_playerDeathEffect, TheGame::PLAYER_LAYER);
         }
         AudioSystem::instance->PlaySound(spawnSound);
     }
@@ -140,6 +141,7 @@ void ClientSimulation::OnPlayerDestroy(const NetSender&, NetMessage message)
     if (m_players[index] == m_localPlayer)
     {
         m_localPlayer = nullptr;
+        SpriteGameRenderer::instance->AddEffectToLayer(TheGame::instance->m_playerDeathEffect, TheGame::PLAYER_LAYER);
     }
     delete m_players[index];
     m_players[index] = nullptr;
