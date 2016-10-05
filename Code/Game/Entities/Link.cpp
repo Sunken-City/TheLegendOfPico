@@ -204,6 +204,12 @@ void Link::ApplyDamageEffect()
 //-----------------------------------------------------------------------------------
 bool Link::CanMove()
 {
-    return !(m_timeOfLastAttack > (GetCurrentTimeSeconds() - SWORD_STUN_DURATION_SECONDS));
+    return !IsAttacking();
+}
+
+//-----------------------------------------------------------------------------------
+bool Link::IsAttacking()
+{
+    return (m_timeOfLastAttack > (GetCurrentTimeSeconds() - SWORD_STUN_DURATION_SECONDS));
 }
 

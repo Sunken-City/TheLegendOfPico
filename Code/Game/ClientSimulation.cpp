@@ -149,7 +149,7 @@ void ClientSimulation::OnPlayerDestroy(const NetSender&, NetMessage message)
 //-----------------------------------------------------------------------------------
 void ClientSimulation::OnLocalPlayerAttackInput(const InputValue*)
 {
-    if (m_localPlayer && m_localPlayer->CanMove())
+    if (m_localPlayer && !m_localPlayer->IsAttacking())
     {
         bool isRequest = true;
         NetMessage attackMessage(GameNetMessages::PLAYER_ATTACK);

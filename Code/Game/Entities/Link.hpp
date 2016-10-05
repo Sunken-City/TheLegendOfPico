@@ -33,6 +33,7 @@ public:
     void ApplyClientUpdate();
     void ApplyDamageEffect();
     bool CanMove();
+    bool IsAttacking();
 
     //CONSTANTS/////////////////////////////////////////////////////////////////////
     const float HURT_FLASH_DURATION_SECONDS = 0.5f;
