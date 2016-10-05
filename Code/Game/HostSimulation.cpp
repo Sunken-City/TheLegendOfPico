@@ -151,17 +151,17 @@ void HostSimulation::OnPlayerAttack(const NetSender& from, NetMessage message)
     uint8_t index = from.connection->m_index;
     message.Read<bool>(wasSentARequest);
 
-    Link* attackingPlayer = m_players[index];
-    if (!attackingPlayer)
-    {
-        return;
-    }
-    Vector2 swordPosition = attackingPlayer->CalculateSwordPosition();
-    float swordRotation = attackingPlayer->CalculateSwordRotationDegrees();
-    attackingPlayer->m_timeOfLastAttack = GetCurrentTimeSeconds();
-
     if (wasSentARequest)
     {
+        Link* attackingPlayer = m_players[index];
+        if (!attackingPlayer)
+        {
+            return;
+        }
+        Vector2 swordPosition = attackingPlayer->CalculateSwordPosition();
+        float swordRotation = attackingPlayer->CalculateSwordRotationDegrees();
+        attackingPlayer->m_timeOfLastAttack = GetCurrentTimeSeconds();
+
         for (NetConnection* conn : NetSession::instance->m_allConnections)
         {
             if (conn)

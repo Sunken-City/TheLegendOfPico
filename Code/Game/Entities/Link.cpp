@@ -48,7 +48,7 @@ void Link::Update(float deltaSeconds)
     InputMap& input = TheGame::instance->m_host->m_networkMappings[m_netOwnerIndex];
     
     Vector2 inputDirection = input.GetVector2("Right", "Up");
-    if (CanMove())
+    if (this->CanMove())
     {
         Vector2 attemptedPosition = m_position + inputDirection * adjustedSpeed;
         AttemptMove(attemptedPosition);
