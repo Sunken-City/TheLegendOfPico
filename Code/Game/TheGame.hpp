@@ -44,8 +44,8 @@ public:
     static const uint8_t MAX_PLAYERS = 8;
 
     static unsigned int const BACKGROUND_LAYER = 0;
-    static unsigned int const ITEM_LAYER = 8;
-    static unsigned int const ENEMY_LAYER = 9;
+    static unsigned int const BLOOD_LAYER = 8;
+    static unsigned int const BODY_LAYER = 9;
     static unsigned int const PLAYER_LAYER = 10;
     static unsigned int const WEAPON_LAYER = 11;
     static unsigned int const ENEMY_BULLET_LAYER = 12;

@@ -12,6 +12,7 @@
 #include "Engine/Renderer/2D/ParticleSystemDefinition.hpp"
 #include "Engine/Audio/Audio.hpp"
 #include "Engine/Time/Time.hpp"
+#include "Engine/Math/MathUtilities.hpp"
 
 //-----------------------------------------------------------------------------------
 ClientSimulation::ClientSimulation()
@@ -122,7 +123,7 @@ void ClientSimulation::OnPlayerCreate(const NetSender&, NetMessage message)
         {
             m_localPlayer = player;
             m_localPlayerColor = color;
-            SpriteGameRenderer::instance->RemoveEffectFromLayer(TheGame::instance->m_playerDeathEffect, TheGame::PLAYER_LAYER);
+            SpriteGameRenderer::instance->RemoveEffectFromLayer(TheGame::instance->m_playerDeathEffect, TheGame::FOREGROUND_LAYER);
         }
         AudioSystem::instance->PlaySound(spawnSound);
     }
@@ -138,13 +139,21 @@ void ClientSimulation::OnPlayerDestroy(const NetSender&, NetMessage message)
     static const SoundID deathSound = AudioSystem::instance->CreateOrGetSound("Data\\SFX\\Oracle_Link_Dying.wav");
     uint8_t index = NetSession::INVALID_CONNECTION_INDEX;
     message.Read<uint8_t>(index);
+
+    //Spawn a deadboy right here.
+    const std::string particleEffect = MathUtils::GetRandomIntFromZeroTo(2) == 0 ? "DeadLink1" : "DeadLink2";
+    ResourceDatabase::instance->GetParticleSystemResource(particleEffect)->m_emitterDefinitions[0]->m_initialTintPerParticle = m_players[index]->m_color;
+    ParticleSystem::PlayOneShotParticleEffect(particleEffect, TheGame::BODY_LAYER, m_players[index]->m_position, 0.0f);
+    ParticleSystem::PlayOneShotParticleEffect("BloodPool", TheGame::BLOOD_LAYER, m_players[index]->m_position, GetRandomFloatInRange(0.0f, 360.0f));
+
     if (m_players[index] == m_localPlayer)
     {
         m_localPlayer = nullptr;
-        SpriteGameRenderer::instance->AddEffectToLayer(TheGame::instance->m_playerDeathEffect, TheGame::PLAYER_LAYER);
+        SpriteGameRenderer::instance->AddEffectToLayer(TheGame::instance->m_playerDeathEffect, TheGame::FOREGROUND_LAYER);
     }
     delete m_players[index];
     m_players[index] = nullptr;
+
     AudioSystem::instance->PlaySound(deathSound);
 }
 

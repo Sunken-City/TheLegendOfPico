@@ -429,6 +429,9 @@ void TheGame::RegisterSprites()
     ResourceDatabase::instance->RegisterSprite("pUp", "Data\\Images\\standingUp.png");
     ResourceDatabase::instance->RegisterSprite("pRight", "Data\\Images\\standingRight.png");
     ResourceDatabase::instance->RegisterSprite("pLeft", "Data\\Images\\standingLeft.png");
+    ResourceDatabase::instance->RegisterSprite("dead1", "Data\\Images\\dead1.png");
+    ResourceDatabase::instance->RegisterSprite("dead2", "Data\\Images\\dead2.png");
+    ResourceDatabase::instance->RegisterSprite("bloodPool", "Data\\Images\\bloodPool.png");
     ResourceDatabase::instance->RegisterSprite("swordSwing", "Data\\Images\\swordSwing.png");
     ResourceDatabase::instance->RegisterSprite("Arrow", "Data\\Images\\arrow.png");
 
@@ -447,6 +450,34 @@ void TheGame::RegisterParticleSystems()
     swordAttackEmitter->m_particlesPerSecond = 0.0f;
     swordAttackEmitter->m_fadeoutEnabled = false;
     swordAttackSystem->AddEmitter(swordAttackEmitter);
+
+    ParticleSystemDefinition* deadLinkSystem = ResourceDatabase::instance->RegisterParticleSystem("DeadLink1", ONE_SHOT);
+    ParticleEmitterDefinition* deadLinkEmitter = new ParticleEmitterDefinition(ResourceDatabase::instance->GetSpriteResource("dead1"));
+    deadLinkEmitter->m_initialNumParticlesSpawn = 1;
+    deadLinkEmitter->m_lifetimePerParticle = 10.0f;
+    deadLinkEmitter->m_material = deadLinkEmitter->m_spriteResource->m_defaultMaterial;
+    deadLinkEmitter->m_particlesPerSecond = 0.0f;
+    deadLinkEmitter->m_fadeoutEnabled = false;
+    deadLinkSystem->AddEmitter(deadLinkEmitter);
+
+    ParticleSystemDefinition* deadLinkSystem2 = ResourceDatabase::instance->RegisterParticleSystem("DeadLink2", ONE_SHOT);
+    ParticleEmitterDefinition* deadLinkEmitter2 = new ParticleEmitterDefinition(ResourceDatabase::instance->GetSpriteResource("dead2"));
+    deadLinkEmitter2->m_initialNumParticlesSpawn = 1;
+    deadLinkEmitter2->m_lifetimePerParticle = 10.0f;
+    deadLinkEmitter2->m_material = deadLinkEmitter2->m_spriteResource->m_defaultMaterial;
+    deadLinkEmitter2->m_particlesPerSecond = 0.0f;
+    deadLinkEmitter2->m_fadeoutEnabled = false;
+    deadLinkSystem2->AddEmitter(deadLinkEmitter2);
+
+    ParticleSystemDefinition* bloodPoolSystem = ResourceDatabase::instance->RegisterParticleSystem("BloodPool", ONE_SHOT);
+    ParticleEmitterDefinition* bloodPoolEmitter = new ParticleEmitterDefinition(ResourceDatabase::instance->GetSpriteResource("bloodPool"));
+    bloodPoolEmitter->m_initialNumParticlesSpawn = 1;
+    bloodPoolEmitter->m_lifetimePerParticle = 60.0f;
+    bloodPoolEmitter->m_material = bloodPoolEmitter->m_spriteResource->m_defaultMaterial;
+    bloodPoolEmitter->m_particlesPerSecond = 0.0f;
+    bloodPoolEmitter->m_fadeoutEnabled = true;
+    bloodPoolSystem->AddEmitter(bloodPoolEmitter);
+
 }
 
 //-----------------------------------------------------------------------------------
