@@ -104,6 +104,7 @@ void ClientSimulation::SendNetClientUpdate(NetConnection* cp)
 //-----------------------------------------------------------------------------------
 void ClientSimulation::OnPlayerCreate(const NetSender&, NetMessage message)
 {
+    static const SoundID spawnSound = AudioSystem::instance->CreateOrGetSound("Data\\SFX\\Oracle_SwordShimmer.wav");
     Link* player = new Link();
     unsigned int color = 0;
     bool isRequest = false;
@@ -121,6 +122,7 @@ void ClientSimulation::OnPlayerCreate(const NetSender&, NetMessage message)
         {
             m_localPlayer = player;
         }
+        AudioSystem::instance->PlaySound(spawnSound);
     }
     else
     {
@@ -131,6 +133,7 @@ void ClientSimulation::OnPlayerCreate(const NetSender&, NetMessage message)
 //-----------------------------------------------------------------------------------
 void ClientSimulation::OnPlayerDestroy(const NetSender&, NetMessage message)
 {
+    static const SoundID deathSound = AudioSystem::instance->CreateOrGetSound("Data\\SFX\\Oracle_Link_Dying.wav");
     uint8_t index = NetSession::INVALID_CONNECTION_INDEX;
     message.Read<uint8_t>(index);
     if (m_players[index] == m_localPlayer)
@@ -139,6 +142,7 @@ void ClientSimulation::OnPlayerDestroy(const NetSender&, NetMessage message)
     }
     delete m_players[index];
     m_players[index] = nullptr;
+    AudioSystem::instance->PlaySound(deathSound);
 }
 
 //-----------------------------------------------------------------------------------
