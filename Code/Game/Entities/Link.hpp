@@ -31,12 +31,17 @@ public:
     Facing GetFacingFromInput(const Vector2& inputDirection);
     void SetColor(unsigned int color);
     void ApplyClientUpdate();
+    void ApplyDamageEffect();
+
+    //CONSTANTS/////////////////////////////////////////////////////////////////////
+    const float HURT_FLASH_DURATION_SECONDS = 0.5f;
 
     //MEMBER VARIABLES/////////////////////////////////////////////////////////////////////
     uint8_t m_netOwnerIndex;
     Facing m_facing;
     float m_speed;
     float m_rateOfFire;
-    float m_timeSinceLastShot;
+    float m_timeSinceLastHurt;
     RGBA m_color;
+    double m_lastHurtTime;
 };

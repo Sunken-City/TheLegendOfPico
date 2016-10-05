@@ -6,6 +6,7 @@
 #include "Game/TheGame.hpp"
 #include "Engine/Renderer/2D/ResourceDatabase.hpp"
 #include "Game/HostSimulation.hpp"
+#include "Engine/Time/Time.hpp"
 
 //-----------------------------------------------------------------------------------
 Link::Link(const RGBA& color) 
@@ -13,8 +14,9 @@ Link::Link(const RGBA& color)
     , m_netOwnerIndex(0)
     , m_facing(Facing::SOUTH)
     , m_rateOfFire(0.0f)
-    , m_timeSinceLastShot(0.0f)
+    , m_timeSinceLastHurt(0.0f)
     , m_color(color)
+    , m_lastHurtTime(0.0f)
 {
     m_collisionRadius = 0.3f;
     m_isDead = false;
@@ -38,7 +40,7 @@ void Link::Update(float deltaSeconds)
 {
     ASSERT_OR_DIE(TheGame::instance->m_host, "Update for the player should not be called on the clients.");
     Entity::Update(deltaSeconds);
-    m_timeSinceLastShot += deltaSeconds;
+    m_timeSinceLastHurt += deltaSeconds;
     float adjustedSpeed = m_speed / 20.0f;
 
     InputMap& input = TheGame::instance->m_host->m_networkMappings[m_netOwnerIndex];
@@ -161,19 +163,38 @@ Link::Facing Link::GetFacingFromInput(const Vector2& inputDirection)
 void Link::SetColor(unsigned int color)
 {
     m_color = RGBA(color);
-    if (m_sprite)
-    {
-        m_sprite->m_tintColor = m_color;
-    }
+    m_sprite->m_tintColor = m_color;
 }
 
 //-----------------------------------------------------------------------------------
 void Link::ApplyClientUpdate()
 {
-    if (m_sprite)
-    {
-        m_sprite->m_position = m_position;
-    }
+    m_sprite->m_position = m_position;
     UpdateSpriteFromFacing();
+    ApplyDamageEffect();
+}
+
+//-----------------------------------------------------------------------------------
+void Link::ApplyDamageEffect()
+{
+    const float flashSpeed = 60.0f;
+    double currentTime = GetCurrentTimeSeconds();
+    
+    if (m_timeSinceLastHurt > (currentTime - HURT_FLASH_DURATION_SECONDS))
+    {
+        double colorVariation = sin(currentTime * flashSpeed);
+        if (colorVariation < 0.0)
+        {
+            m_sprite->m_tintColor = m_color.GetInverse();
+        }
+        else
+        {
+            m_sprite->m_tintColor = m_color;
+        }
+    }
+    else
+    {
+        m_sprite->m_tintColor = m_color;
+    }
 }
 

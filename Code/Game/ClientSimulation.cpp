@@ -11,6 +11,7 @@
 #include "Engine/Renderer/2D/ResourceDatabase.hpp"
 #include "Engine/Renderer/2D/ParticleSystemDefinition.hpp"
 #include "Engine/Audio/Audio.hpp"
+#include "Engine/Time/Time.hpp"
 
 //-----------------------------------------------------------------------------------
 ClientSimulation::ClientSimulation()
@@ -57,7 +58,7 @@ void ClientSimulation::Update(float deltaSeconds)
 //-----------------------------------------------------------------------------------
 void ClientSimulation::OnUpdateFromHostReceived(const NetSender& from, NetMessage& message)
 {
-    if (from.connection && m_localPlayer)
+    if (from.connection)
     {
         for (Link* networkedPlayer : m_players)
         {
@@ -143,19 +144,25 @@ void ClientSimulation::OnPlayerDestroy(const NetSender&, NetMessage message)
 //-----------------------------------------------------------------------------------
 void ClientSimulation::OnLocalPlayerAttackInput(const InputValue*)
 {
-    bool isRequest = true;
-    NetMessage attackMessage(GameNetMessages::PLAYER_ATTACK);
-    attackMessage.Write<bool>(isRequest);
-    NetSession::instance->m_hostConnection->SendMessage(attackMessage);
+    if (m_localPlayer)
+    {
+        bool isRequest = true;
+        NetMessage attackMessage(GameNetMessages::PLAYER_ATTACK);
+        attackMessage.Write<bool>(isRequest);
+        NetSession::instance->m_hostConnection->SendMessage(attackMessage);
+    }
 }
 
 //-----------------------------------------------------------------------------------
 void ClientSimulation::OnLocalPlayerFireBowInput(const InputValue*)
 {
-    bool isRequest = true;
-    NetMessage attackMessage(GameNetMessages::PLAYER_FIRE_BOW);
-    attackMessage.Write<bool>(isRequest);
-    NetSession::instance->m_hostConnection->SendMessage(attackMessage);
+    if (m_localPlayer)
+    {
+        bool isRequest = true;
+        NetMessage attackMessage(GameNetMessages::PLAYER_FIRE_BOW);
+        attackMessage.Write<bool>(isRequest);
+        NetSession::instance->m_hostConnection->SendMessage(attackMessage);
+    }
 }
 
 //-----------------------------------------------------------------------------------
@@ -194,19 +201,22 @@ void ClientSimulation::OnPlayerAttack(const NetSender&, NetMessage message)
         ASSERT_OR_DIE(index < TheGame::MAX_PLAYERS, "Invalid index attached to attack message");
         attackingPlayer = m_players[index];
 
-        ResourceDatabase::instance->GetParticleSystemResource("SwordAttack")->m_emitterDefinitions[0]->m_initialTintPerParticle = attackingPlayer->m_color;
-        ParticleSystem::PlayOneShotParticleEffect("SwordAttack", TheGame::WEAPON_LAYER, swordPosition, swordRotation);
-
-        switch (MathUtils::GetRandomIntFromZeroTo(3))
+        if (attackingPlayer)
         {
-        case 0:
-            AudioSystem::instance->PlaySound(swordSound1);
-        case 1:
-            AudioSystem::instance->PlaySound(swordSound2);
-        case 2:
-            AudioSystem::instance->PlaySound(swordSound3);
-        default:
-            break;
+            ResourceDatabase::instance->GetParticleSystemResource("SwordAttack")->m_emitterDefinitions[0]->m_initialTintPerParticle = attackingPlayer->m_color;
+            ParticleSystem::PlayOneShotParticleEffect("SwordAttack", TheGame::WEAPON_LAYER, swordPosition, swordRotation);
+
+            switch (MathUtils::GetRandomIntFromZeroTo(3))
+            {
+            case 0:
+                AudioSystem::instance->PlaySound(swordSound1);
+            case 1:
+                AudioSystem::instance->PlaySound(swordSound2);
+            case 2:
+                AudioSystem::instance->PlaySound(swordSound3);
+            default:
+                break;
+            }
         }
     }
 }
@@ -222,6 +232,10 @@ void ClientSimulation::OnPlayerDamaged(const NetSender&, NetMessage message)
 
     ASSERT_OR_DIE(index < TheGame::MAX_PLAYERS, "Invalid index attached to attack message");
     hurtPlayer = m_players[index];
+    if (hurtPlayer)
+    {
+        hurtPlayer->m_timeSinceLastHurt = GetCurrentTimeSeconds();
+    }
 
     AudioSystem::instance->PlaySound(hurtSound);
 }
