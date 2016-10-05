@@ -231,18 +231,16 @@ void HostSimulation::OnPlayerFireBow(const NetSender& from, NetMessage& message)
 void HostSimulation::SendNetHostUpdate(NetConnection* cp)
 {
     NetMessage update(GameNetMessages::HOST_TO_CLIENT_UPDATE);
-    bool hasPlayer = false;
     for (Link* link : m_players)
     {
         if (link)
         {
             update.Write<Vector2>(link->m_position);
             update.Write<Link::Facing>(link->m_facing);
-            hasPlayer = true;
         }
     }
-    if (hasPlayer)
-    {
+    cp->SendMessage(update);
+
 //         unsigned int* numEntities = update.Reserve<unsigned int>(m_entities.size());
 //         for (Entity* entity : m_entities)
 //         {
@@ -257,8 +255,6 @@ void HostSimulation::SendNetHostUpdate(NetConnection* cp)
 //             update.Write<Vector2>(entity->m_position);
 //             update.Write<float>(entity->m_rotationDegrees);
 //         }
-         cp->SendMessage(update);
-    }
 }
 
 //-----------------------------------------------------------------------------------

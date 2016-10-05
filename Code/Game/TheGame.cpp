@@ -439,3 +439,18 @@ void TheGame::RegisterParticleSystems()
     swordAttackEmitter->m_fadeoutEnabled = false;
     swordAttackSystem->AddEmitter(swordAttackEmitter);
 }
+
+//-----------------------------------------------------------------------------------
+CONSOLE_COMMAND(joingame)
+{
+    if (!args.HasArgs(1))
+    {
+        Console::instance->PrintLine("joingame <ip>", RGBA::RED);
+    }
+    std::string ipAddress = args.GetStringArgument(0);
+    TheGame::instance->m_client = new ClientSimulation();
+    Console::instance->RunCommand(Stringf("netjoin client%i %s", rand(), ipAddress.c_str()));
+    
+    SetGameState(PLAYING);
+    TheGame::instance->InitializePlayingState();
+}

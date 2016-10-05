@@ -68,6 +68,7 @@ void ClientSimulation::OnUpdateFromHostReceived(const NetSender& from, NetMessag
                 networkedPlayer->ApplyClientUpdate();
             }
         }
+    }
 //         unsigned int numEntities = 0;
 //         message.Read<unsigned int>(numEntities);
 //         for (unsigned int i = 0; i < numEntities; ++i)
@@ -83,7 +84,6 @@ void ClientSimulation::OnUpdateFromHostReceived(const NetSender& from, NetMessag
 //                 entity->ApplyClientUpdate();
 //             }
 //         }
-    }
 }
 
 //-----------------------------------------------------------------------------------

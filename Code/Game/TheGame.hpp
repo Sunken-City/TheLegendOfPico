@@ -35,6 +35,7 @@ public:
     void OnNetTick(NetConnection* cp);
     void Update(float deltaTime);
     void Render() const;
+    void InitializePlayingState();
 
     static TheGame* instance;
 
@@ -63,7 +64,6 @@ private:
     void RenderGameOver() const;
     void RegisterSprites();
     void RegisterParticleSystems();
-    void InitializePlayingState();
     void UpdatePlaying(float deltaSeconds);
     void RenderPlaying() const;
     void InitializeGameOverState();
