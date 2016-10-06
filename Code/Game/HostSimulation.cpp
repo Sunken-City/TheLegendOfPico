@@ -350,4 +350,26 @@ void HostSimulation::InitializeLevelGeometry()
     m_levelGeometry.emplace_back(Vector2::ZERO - UNITS_OFFSET, Vector2(16.0f, 256.0f) * UNITS_PER_PIXEL - UNITS_OFFSET);
     m_levelGeometry.emplace_back(Vector2(480.0f - 16.0f, 0.0f) * UNITS_PER_PIXEL - UNITS_OFFSET, Vector2(480.0f, 256.0f) * UNITS_PER_PIXEL - UNITS_OFFSET);
     m_levelGeometry.emplace_back(Vector2(0.0f, 256.0f - 16.0f) * UNITS_PER_PIXEL - UNITS_OFFSET, Vector2(480.0f, 256.0f) * UNITS_PER_PIXEL - UNITS_OFFSET);
+
+    //Upper Houses
+    m_levelGeometry.emplace_back(Vector2(0.0f, 209.0f) * UNITS_PER_PIXEL - UNITS_OFFSET, Vector2(63.0f, 256.0f) * UNITS_PER_PIXEL - UNITS_OFFSET);
+    m_levelGeometry.emplace_back(Vector2(416.0f, 209.0f) * UNITS_PER_PIXEL - UNITS_OFFSET, Vector2(463.0f, 256.0f) * UNITS_PER_PIXEL - UNITS_OFFSET);
+
+    //Lower Houses
+    m_levelGeometry.emplace_back(Vector2(368.0f, 64.f) * UNITS_PER_PIXEL - UNITS_OFFSET, Vector2(415.f, 95.f) * UNITS_PER_PIXEL - UNITS_OFFSET);
+    m_levelGeometry.emplace_back(Vector2(64.0f, 64.0f) * UNITS_PER_PIXEL - UNITS_OFFSET, Vector2(111.0f, 95.0f) * UNITS_PER_PIXEL - UNITS_OFFSET);
+
+    //Lower Fountains
+    m_levelGeometry.emplace_back(Vector2(16.0f, 16.0f) * UNITS_PER_PIXEL - UNITS_OFFSET, Vector2(47.0f, 47.0f) * UNITS_PER_PIXEL - UNITS_OFFSET);
+    m_levelGeometry.emplace_back(Vector2(432.0f, 16.0f) * UNITS_PER_PIXEL - UNITS_OFFSET, Vector2(463.0f, 47.0f) * UNITS_PER_PIXEL - UNITS_OFFSET);
+
+    //Center Area
+    m_levelGeometry.emplace_back(Vector2(224.f, 48.0f) * UNITS_PER_PIXEL - UNITS_OFFSET, Vector2(255.f, 144.0f) * UNITS_PER_PIXEL - UNITS_OFFSET);
+    m_levelGeometry.emplace_back(Vector2(191.0f, 65.0f) * UNITS_PER_PIXEL - UNITS_OFFSET, Vector2(287.0f, 95.0f) * UNITS_PER_PIXEL - UNITS_OFFSET);
+    
+    //Trees
+    m_levelGeometry.emplace_back(Vector2(144.0f, 16.0f) * UNITS_PER_PIXEL - UNITS_OFFSET, Vector2(175.0f, 47.0f) * UNITS_PER_PIXEL - UNITS_OFFSET);
+    m_levelGeometry.emplace_back(Vector2(304.0f, 112.0f) * UNITS_PER_PIXEL - UNITS_OFFSET, Vector2(335.0f, 144.0f) * UNITS_PER_PIXEL - UNITS_OFFSET);
+    m_levelGeometry.emplace_back(Vector2(144.0f, 112.0f) * UNITS_PER_PIXEL - UNITS_OFFSET, Vector2(175.0f, 144.0f) * UNITS_PER_PIXEL - UNITS_OFFSET);
+    m_levelGeometry.emplace_back(Vector2(304.0f, 16.0f) * UNITS_PER_PIXEL - UNITS_OFFSET, Vector2(335.0f, 47.0f) * UNITS_PER_PIXEL - UNITS_OFFSET);
 }

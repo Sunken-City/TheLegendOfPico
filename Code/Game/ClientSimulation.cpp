@@ -76,7 +76,7 @@ void ClientSimulation::UpdateHearts(float hp)
     //Reminder that hp is a copy, so we use it to count down how much hp we have.
     for (int i = 0; i < 5; ++i)
     {
-        m_hearts[i]->m_position = SpriteGameRenderer::instance->GetCameraPositionInWorld() + Vector2(-3.5f, 3.5f) + (Vector2(1.0f, 0.0f) * i);
+        m_hearts[i]->m_position = SpriteGameRenderer::instance->GetCameraPositionInWorld() + Vector2(-4.0f, 3.5f) + (Vector2(1.0f, 0.0f) * i);
         m_hearts[i]->m_tintColor = m_localPlayerColor;
         if (hp >= 2.0f)
         {
