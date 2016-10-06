@@ -7,6 +7,7 @@ class NetMessage;
 class Entity;
 class NetConnection;
 class InputValue;
+class Sprite;
 struct NetSender;
 
 class ClientSimulation
@@ -18,6 +19,7 @@ public:
 
     //FUNCTIONS/////////////////////////////////////////////////////////////////////
     void Update(float deltaSeconds);
+    void UpdateHearts(float hp);
     void OnUpdateFromHostReceived(const NetSender& from, NetMessage& message);
     void SendNetClientUpdate(NetConnection* cp);
     void OnPlayerCreate(const NetSender& from, NetMessage message);
@@ -34,4 +36,5 @@ public:
     unsigned int m_localPlayerColor;
     std::vector<Link*> m_players;
     std::map<uint16_t, Entity*> m_entities;
+    Sprite* m_hearts[5];
 };

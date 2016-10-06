@@ -240,6 +240,7 @@ void HostSimulation::SendNetHostUpdate(NetConnection* cp)
         {
             update.Write<Vector2>(link->m_position);
             update.Write<Link::Facing>(link->m_facing);
+            update.Write<float>(link->m_hp);
         }
     }
     cp->SendMessage(update);

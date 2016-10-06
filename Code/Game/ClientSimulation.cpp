@@ -23,6 +23,11 @@ ClientSimulation::ClientSimulation()
     {
         m_players.push_back(nullptr);
     }
+    for (int i = 0; i < 5; ++i)
+    {
+        m_hearts[i] = new Sprite("fullHeart", TheGame::FOREGROUND_LAYER, true);
+    }
+
     TheGame::instance->m_gameplayMapping.FindInputValue("Attack")->m_OnPress.RegisterMethod(this, &ClientSimulation::OnLocalPlayerAttackInput);
     TheGame::instance->m_gameplayMapping.FindInputValue("FireBow")->m_OnPress.RegisterMethod(this, &ClientSimulation::OnLocalPlayerFireBowInput);
     TheGame::instance->m_gameplayMapping.FindInputValue("Respawn")->m_OnPress.RegisterMethod(this, &ClientSimulation::OnLocalPlayerRespawnInput);
@@ -36,6 +41,11 @@ ClientSimulation::~ClientSimulation()
         delete link;
     }
     m_players.clear();
+
+    for (int i = 0; i < 5; ++i)
+    {
+        delete m_hearts[i];
+    }
 }
 
 //-----------------------------------------------------------------------------------
@@ -45,6 +55,8 @@ void ClientSimulation::Update(float deltaSeconds)
     if (m_localPlayer)
     {
         SpriteGameRenderer::instance->SetCameraPosition(m_localPlayer->m_position);
+        UpdateHearts(m_localPlayer->m_hp);
+
     }
     else
     {
@@ -52,6 +64,31 @@ void ClientSimulation::Update(float deltaSeconds)
         {
             m_localPlayer = m_players[NetSession::instance->GetMyConnectionIndex()];
             m_localPlayerColor = m_localPlayer->m_color.ToUnsignedInt();
+        }
+    }
+}
+
+//-----------------------------------------------------------------------------------
+void ClientSimulation::UpdateHearts(float hp)
+{
+    //Reminder that hp is a copy, so we use it to count down how much hp we have.
+    for (int i = 0; i < 5; ++i)
+    {
+        m_hearts[i]->m_position = SpriteGameRenderer::instance->GetCameraPositionInWorld() + Vector2(-3.5f, 3.5f) + (Vector2(1.0f, 0.0f) * i);
+        m_hearts[i]->m_tintColor = m_localPlayerColor;
+        if (hp >= 2.0f)
+        {
+            m_hearts[i]->m_spriteResource = ResourceDatabase::instance->GetSpriteResource("fullHeart");
+            hp -= 2.0f;
+        }
+        else if (hp >= 1.0f)
+        {
+            m_hearts[i]->m_spriteResource = ResourceDatabase::instance->GetSpriteResource("halfHeart");
+            hp -= 1.0f;
+        }
+        else
+        {
+            m_hearts[i]->m_spriteResource = ResourceDatabase::instance->GetSpriteResource("emptyHeart");
         }
     }
 }
@@ -67,6 +104,7 @@ void ClientSimulation::OnUpdateFromHostReceived(const NetSender& from, NetMessag
             {
                 message.Read<Vector2>(networkedPlayer->m_position);
                 message.Read<Link::Facing>(networkedPlayer->m_facing);
+                message.Read<float>(networkedPlayer->m_hp);
                 networkedPlayer->ApplyClientUpdate();
             }
         }
@@ -149,6 +187,7 @@ void ClientSimulation::OnPlayerDestroy(const NetSender&, NetMessage message)
     if (m_players[index] == m_localPlayer)
     {
         m_localPlayer = nullptr;
+        UpdateHearts(0.0f);
         SpriteGameRenderer::instance->AddEffectToLayer(TheGame::instance->m_playerDeathEffect, TheGame::FOREGROUND_LAYER);
     }
     delete m_players[index];

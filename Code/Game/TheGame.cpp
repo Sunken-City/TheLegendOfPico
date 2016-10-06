@@ -435,6 +435,10 @@ void TheGame::RegisterSprites()
     ResourceDatabase::instance->RegisterSprite("swordSwing", "Data\\Images\\swordSwing.png");
     ResourceDatabase::instance->RegisterSprite("Arrow", "Data\\Images\\arrow.png");
 
+    ResourceDatabase::instance->RegisterSprite("fullHeart", "Data\\Images\\fullHeart.png");
+    ResourceDatabase::instance->RegisterSprite("halfHeart", "Data\\Images\\halfHeart.png");
+    ResourceDatabase::instance->RegisterSprite("emptyHeart", "Data\\Images\\emptyHeart.png");
+
     ResourceDatabase::instance->RegisterSprite("TitleText", "Data\\Images\\Title.png");
     ResourceDatabase::instance->RegisterSprite("GameOverText", "Data\\Images\\GameOver.png");
 }
