@@ -58,13 +58,17 @@ void Link::Update(float deltaSeconds)
 }
 
 //-----------------------------------------------------------------------------------
-void Link::AttemptMove(const Vector2& attemptedPosition)
+void Link::AttemptMove(Vector2& attemptedPosition)
 {
     for (AABB2& geometry : TheGame::instance->m_host->m_levelGeometry)
     {
-        if (geometry.IsIntersecting(m_position, m_collisionRadius))
+        while (geometry.IsIntersecting(attemptedPosition, m_collisionRadius))
         {
-            return;
+            AABB2 minkowskiBox = AABB2(Vector2(geometry.mins.x - m_collisionRadius, geometry.mins.y - m_collisionRadius), Vector2(geometry.maxs.x + m_collisionRadius, geometry.maxs.y + m_collisionRadius));
+            Vector2 distInside = minkowskiBox.GetSmallestResolutionVector(attemptedPosition);
+            bool xIsSmaller = abs(distInside.x) < abs(distInside.y);
+            Vector2 displacement = Vector2(xIsSmaller ? distInside.x : 0.0f, xIsSmaller ? 0.0f : distInside.y);
+            attemptedPosition += displacement;
         }
     }
     m_position = attemptedPosition;

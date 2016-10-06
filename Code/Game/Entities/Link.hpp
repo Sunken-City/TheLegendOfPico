@@ -22,7 +22,7 @@ public:
     //FUNCTIONS/////////////////////////////////////////////////////////////////////
     virtual void Update(float deltaSeconds);
 
-    void AttemptMove(const Vector2& attemptedPosition);
+    void AttemptMove(Vector2& attemptedPosition);
 
     virtual void Render() const;
     virtual void ResolveCollision(Entity* otherEntity);
