@@ -183,10 +183,13 @@ void ClientSimulation::OnPlayerDestroy(const NetSender&, NetMessage message)
     message.Read<uint8_t>(index);
 
     //Spawn a deadboy right here.
-    const std::string particleEffect = MathUtils::GetRandomIntFromZeroTo(2) == 0 ? "DeadLink1" : "DeadLink2";
-    ResourceDatabase::instance->GetParticleSystemResource(particleEffect)->m_emitterDefinitions[0]->m_initialTintPerParticle = m_players[index]->m_color;
-    ParticleSystem::PlayOneShotParticleEffect(particleEffect, TheGame::BODY_LAYER, m_players[index]->m_position, 0.0f);
-    ParticleSystem::PlayOneShotParticleEffect("BloodPool", TheGame::BLOOD_LAYER, m_players[index]->m_position, GetRandomFloatInRange(0.0f, 360.0f));
+    if (m_players[index])
+    {
+        const std::string particleEffect = MathUtils::GetRandomIntFromZeroTo(2) == 0 ? "DeadLink1" : "DeadLink2";
+        ResourceDatabase::instance->GetParticleSystemResource(particleEffect)->m_emitterDefinitions[0]->m_initialTintPerParticle = m_players[index]->m_color;
+        ParticleSystem::PlayOneShotParticleEffect(particleEffect, TheGame::BODY_LAYER, m_players[index]->m_position, 0.0f);
+        ParticleSystem::PlayOneShotParticleEffect("BloodPool", TheGame::BLOOD_LAYER, m_players[index]->m_position, GetRandomFloatInRange(0.0f, 360.0f));
+    }
 
     if (m_players[index] == m_localPlayer)
     {

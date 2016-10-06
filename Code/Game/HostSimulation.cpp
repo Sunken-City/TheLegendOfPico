@@ -346,10 +346,10 @@ void HostSimulation::InitializeLevelGeometry()
     const Vector2 UNITS_OFFSET = Vector2(15.0f, 8.0f);
 
     //OuterBox
-    m_levelGeometry.emplace_back(Vector2::ZERO - UNITS_OFFSET, Vector2(480.0f, 16.0f) * UNITS_PER_PIXEL - UNITS_OFFSET);
-    m_levelGeometry.emplace_back(Vector2::ZERO - UNITS_OFFSET, Vector2(16.0f, 256.0f) * UNITS_PER_PIXEL - UNITS_OFFSET);
-    m_levelGeometry.emplace_back(Vector2(480.0f - 16.0f, 0.0f) * UNITS_PER_PIXEL - UNITS_OFFSET, Vector2(480.0f, 256.0f) * UNITS_PER_PIXEL - UNITS_OFFSET);
-    m_levelGeometry.emplace_back(Vector2(0.0f, 256.0f - 16.0f) * UNITS_PER_PIXEL - UNITS_OFFSET, Vector2(480.0f, 256.0f) * UNITS_PER_PIXEL - UNITS_OFFSET);
+    m_levelGeometry.emplace_back(Vector2(0.0f, -500.0f) - UNITS_OFFSET, Vector2(480.0f, 16.0f) * UNITS_PER_PIXEL - UNITS_OFFSET);
+    m_levelGeometry.emplace_back(Vector2(-500.0f, 0.0f) - UNITS_OFFSET, Vector2(16.0f, 256.0f) * UNITS_PER_PIXEL - UNITS_OFFSET);
+    m_levelGeometry.emplace_back(Vector2(480.0f - 16.0f, 0.0f) * UNITS_PER_PIXEL - UNITS_OFFSET, Vector2(480.0f + 500.0f, 256.0f) * UNITS_PER_PIXEL - UNITS_OFFSET);
+    m_levelGeometry.emplace_back(Vector2(0.0f, 256.0f - 16.0f) * UNITS_PER_PIXEL - UNITS_OFFSET, Vector2(480.0f, 256.0f + 500.0f) * UNITS_PER_PIXEL - UNITS_OFFSET);
 
     //Upper Houses
     m_levelGeometry.emplace_back(Vector2(0.0f, 209.0f) * UNITS_PER_PIXEL - UNITS_OFFSET, Vector2(63.0f, 256.0f) * UNITS_PER_PIXEL - UNITS_OFFSET);
@@ -372,4 +372,7 @@ void HostSimulation::InitializeLevelGeometry()
     m_levelGeometry.emplace_back(Vector2(304.0f, 112.0f) * UNITS_PER_PIXEL - UNITS_OFFSET, Vector2(335.0f, 144.0f) * UNITS_PER_PIXEL - UNITS_OFFSET);
     m_levelGeometry.emplace_back(Vector2(144.0f, 112.0f) * UNITS_PER_PIXEL - UNITS_OFFSET, Vector2(175.0f, 144.0f) * UNITS_PER_PIXEL - UNITS_OFFSET);
     m_levelGeometry.emplace_back(Vector2(304.0f, 16.0f) * UNITS_PER_PIXEL - UNITS_OFFSET, Vector2(335.0f, 47.0f) * UNITS_PER_PIXEL - UNITS_OFFSET);
+
+    //Volcano
+    m_levelGeometry.emplace_back(Vector2(192.0f, 193.0f) * UNITS_PER_PIXEL - UNITS_OFFSET, Vector2(287.0f, 240.0f) * UNITS_PER_PIXEL - UNITS_OFFSET);
 }

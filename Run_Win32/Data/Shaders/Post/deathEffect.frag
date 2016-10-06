@@ -25,7 +25,7 @@ void main(void)
 
   float red = (1.0f / (d + 0.1f)) - (time) - 1.0f;
   float inverseRed = 1.0f - red;
-  vec4 bloodBorder = vec4(inverseRed, greyscaleAverage, greyscaleAverage, 1.0f) * textureColor;
+  vec4 bloodBorder = vec4(inverseRed, 0.0f, 0.0f, 1.0f) * textureColor;
 
   outColor = mix(greyscaleColor, bloodBorder, inverseRed);
 }
