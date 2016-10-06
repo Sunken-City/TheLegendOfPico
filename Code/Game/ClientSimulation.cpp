@@ -17,6 +17,7 @@
 //-----------------------------------------------------------------------------------
 ClientSimulation::ClientSimulation()
     : m_localPlayer(nullptr)
+    , m_isTwahMode(false)
 {
     m_players.reserve(8);
     for (unsigned int i = 0; i < 8; ++i)
@@ -31,6 +32,7 @@ ClientSimulation::ClientSimulation()
     TheGame::instance->m_gameplayMapping.FindInputValue("Attack")->m_OnPress.RegisterMethod(this, &ClientSimulation::OnLocalPlayerAttackInput);
     TheGame::instance->m_gameplayMapping.FindInputValue("FireBow")->m_OnPress.RegisterMethod(this, &ClientSimulation::OnLocalPlayerFireBowInput);
     TheGame::instance->m_gameplayMapping.FindInputValue("Respawn")->m_OnPress.RegisterMethod(this, &ClientSimulation::OnLocalPlayerRespawnInput);
+    TheGame::instance->m_gameplayMapping.FindInputValue("Twah")->m_OnPress.RegisterMethod(this, &ClientSimulation::ToggleTwah);
 }
 
 //-----------------------------------------------------------------------------------
@@ -144,6 +146,7 @@ void ClientSimulation::SendNetClientUpdate(NetConnection* cp)
 void ClientSimulation::OnPlayerCreate(const NetSender&, NetMessage message)
 {
     static const SoundID spawnSound = AudioSystem::instance->CreateOrGetSound("Data\\SFX\\Oracle_SwordShimmer.wav");
+    static const SoundID twahSound = AudioSystem::instance->CreateOrGetSound("Data\\SFX\\mars1e.wav");
     Link* player = new Link();
     unsigned int color = 0;
     bool isRequest = false;
@@ -163,7 +166,7 @@ void ClientSimulation::OnPlayerCreate(const NetSender&, NetMessage message)
             m_localPlayerColor = color;
             SpriteGameRenderer::instance->RemoveEffectFromLayer(TheGame::instance->m_playerDeathEffect, TheGame::FOREGROUND_LAYER);
         }
-        AudioSystem::instance->PlaySound(spawnSound);
+        AudioSystem::instance->PlaySound(m_isTwahMode ? twahSound : spawnSound);
     }
     else
     {
@@ -175,6 +178,7 @@ void ClientSimulation::OnPlayerCreate(const NetSender&, NetMessage message)
 void ClientSimulation::OnPlayerDestroy(const NetSender&, NetMessage message)
 {
     static const SoundID deathSound = AudioSystem::instance->CreateOrGetSound("Data\\SFX\\Oracle_Link_Dying.wav");
+    static const SoundID twahSound = AudioSystem::instance->CreateOrGetSound("Data\\SFX\\mars16.wav");
     uint8_t index = NetSession::INVALID_CONNECTION_INDEX;
     message.Read<uint8_t>(index);
 
@@ -193,7 +197,7 @@ void ClientSimulation::OnPlayerDestroy(const NetSender&, NetMessage message)
     delete m_players[index];
     m_players[index] = nullptr;
 
-    AudioSystem::instance->PlaySound(deathSound);
+    AudioSystem::instance->PlaySound(m_isTwahMode ? twahSound : deathSound);
 }
 
 //-----------------------------------------------------------------------------------
@@ -240,6 +244,7 @@ void ClientSimulation::OnPlayerAttack(const NetSender&, NetMessage message)
     static const SoundID swordSound1 = AudioSystem::instance->CreateOrGetSound("Data\\SFX\\Oracle_Sword_Slash1.wav");
     static const SoundID swordSound2 = AudioSystem::instance->CreateOrGetSound("Data\\SFX\\Oracle_Sword_Slash2.wav");
     static const SoundID swordSound3 = AudioSystem::instance->CreateOrGetSound("Data\\SFX\\Oracle_Sword_Slash3.wav");
+    static const SoundID twahSound = AudioSystem::instance->CreateOrGetSound("Data\\SFX\\mars14.wav");
 
     bool isRequest = true;
     uint8_t index = NetSession::INVALID_CONNECTION_INDEX;
@@ -261,16 +266,23 @@ void ClientSimulation::OnPlayerAttack(const NetSender&, NetMessage message)
             ResourceDatabase::instance->GetParticleSystemResource("SwordAttack")->m_emitterDefinitions[0]->m_initialTintPerParticle = attackingPlayer->m_color;
             ParticleSystem::PlayOneShotParticleEffect("SwordAttack", TheGame::WEAPON_LAYER, swordPosition, swordRotation);
 
-            switch (MathUtils::GetRandomIntFromZeroTo(3))
+            if (m_isTwahMode)
             {
-            case 0:
-                AudioSystem::instance->PlaySound(swordSound1);
-            case 1:
-                AudioSystem::instance->PlaySound(swordSound2);
-            case 2:
-                AudioSystem::instance->PlaySound(swordSound3);
-            default:
-                break;
+                AudioSystem::instance->PlaySound(twahSound);
+            }
+            else
+            {
+                switch (MathUtils::GetRandomIntFromZeroTo(3))
+                {
+                case 0:
+                    AudioSystem::instance->PlaySound(swordSound1);
+                case 1:
+                    AudioSystem::instance->PlaySound(swordSound2);
+                case 2:
+                    AudioSystem::instance->PlaySound(swordSound3);
+                default:
+                    break;
+                }
             }
         }
     }
@@ -280,6 +292,7 @@ void ClientSimulation::OnPlayerAttack(const NetSender&, NetMessage message)
 void ClientSimulation::OnPlayerDamaged(const NetSender&, NetMessage message)
 {
     static const SoundID hurtSound = AudioSystem::instance->CreateOrGetSound("Data\\SFX\\Oracle_Link_Hurt.wav");
+    static const SoundID twahSound = AudioSystem::instance->CreateOrGetSound("Data\\SFX\\mars24.wav");
     Link* hurtPlayer = nullptr;
     uint8_t index = NetSession::INVALID_CONNECTION_INDEX;
 
@@ -292,12 +305,13 @@ void ClientSimulation::OnPlayerDamaged(const NetSender&, NetMessage message)
         hurtPlayer->m_timeOfLastHurt = GetCurrentTimeSeconds();
     }
 
-    AudioSystem::instance->PlaySound(hurtSound);
+    AudioSystem::instance->PlaySound(m_isTwahMode ? twahSound : hurtSound);
 }
 
 //-----------------------------------------------------------------------------------
 void ClientSimulation::OnPlayerFireBow(const NetSender& from, NetMessage& message)
 {
     static const SoundID shootSound = AudioSystem::instance->CreateOrGetSound("Data\\SFX\\Oracle_Enemy_Spit.wav");
-    AudioSystem::instance->PlaySound(shootSound);
+    static const SoundID twahSound = AudioSystem::instance->CreateOrGetSound("Data\\SFX\\mars1d.wav");
+    AudioSystem::instance->PlaySound(m_isTwahMode ? twahSound : shootSound);
 }

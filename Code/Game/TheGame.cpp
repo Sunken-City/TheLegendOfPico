@@ -419,6 +419,7 @@ void TheGame::InitializeKeyMappings()
     m_gameplayMapping.AddInputValue("Respawn", keyboard->FindValue('R'));
     m_gameplayMapping.AddInputValue("Host", keyboard->FindValue('H'));
     m_gameplayMapping.AddInputValue("Join", keyboard->FindValue('J'));
+    m_gameplayMapping.AddInputValue("Twah", keyboard->FindValue('T'));
 }
 
 //-----------------------------------------------------------------------------------

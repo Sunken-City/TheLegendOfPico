@@ -30,6 +30,7 @@ public:
     void OnPlayerAttack(const NetSender& from, NetMessage message);
     void OnPlayerDamaged(const NetSender& from, NetMessage message);
     void OnPlayerFireBow(const NetSender& from, NetMessage& message);
+    inline void ToggleTwah(const InputValue*) { m_isTwahMode = !m_isTwahMode; };
 
     //MEMBER VARIABLES/////////////////////////////////////////////////////////////////////
     Link* m_localPlayer;
@@ -37,4 +38,5 @@ public:
     std::vector<Link*> m_players;
     std::map<uint16_t, Entity*> m_entities;
     Sprite* m_hearts[5];
+    bool m_isTwahMode;
 };
